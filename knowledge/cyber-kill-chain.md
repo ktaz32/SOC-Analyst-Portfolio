@@ -17,6 +17,7 @@ The model contains seven stages:
 <img width="2241" height="1465" alt="image" src="https://github.com/user-attachments/assets/738cc48c-8186-4b2a-8cb8-9feb6169d320" />
 
 
+
 From a SOC perspective, the value of the model is not only in naming attack stages, but in understanding:
 
 * What the attacker has already achieved
