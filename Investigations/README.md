@@ -52,6 +52,22 @@ Current phishing cases include:
   - Email was blocked before user delivery
   - Final verdict: True Positive
 
+- **SOC-003 — Internal Email Phishing Alert**
+  - Internal-to-internal email triggered a phishing detection rule
+  - Message content was consistent with routine business communication
+  - No URLs, attachments, credential requests, or suspicious social-engineering indicators were identified
+  - No evidence of account compromise or malicious follow-on activity was observed
+  - Final verdict: False Positive
+
+- **SOC-004 — Malicious Office Attachment / CVE-2017-11882**
+  - Invoice-themed phishing email containing a password-protected malicious attachment was delivered to the recipient
+  - Static and sandbox analysis identified malicious Office-document behavior associated with CVE-2017-11882
+  - SIEM correlation showed `EQNEDT32.EXE`, parented by `excel.exe`, making an allowed outbound request to malicious infrastructure
+  - Malicious email was removed from the recipient mailbox
+  - Affected endpoint was contained through EDR
+  - Final verdict: True Positive
+
+
 Additional categories will be added as investigations are completed.
 
 Planned areas include:
