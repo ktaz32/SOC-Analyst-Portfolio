@@ -28,8 +28,9 @@ The goal of these reports is to show **how conclusions were reached**, rather th
 |---|---|---|---|---|---|---|
 | [SOC-001](./phishing/SOC-001-phishing-url-detected/) | Phishing URL Detected | Phishing / Proxy | High | True Positive | T1204.001 | Proxy analysis, IOC enrichment, access validation, EDR containment |
 | [SOC-002](./phishing/SOC-002-phishing-malicious-attachment/) | Malicious Phishing Attachment Blocked | Phishing / Email | Medium | True Positive | T1566.001 | Email analysis, attachment analysis, sandboxing, mail-flow validation |
-| [SOC-003](./Investigations/phishing/SOC-003-internal-email-false-positive/) | Internal Email Phishing Alert | Medium | **False Positive** | None | False-positive analysis, email review, detection-tuning awareness |
-| [SOC-004](./Investigations/phishing/SOC-004-malicious-office-attachment-cve-2017-11882/) | Malicious Office Attachment / CVE-2017-11882 | High | **True Positive** | T1566.001, T1203, T1105 | Malware analysis, exploit recognition, SIEM correlation, EDR containment |
+| [SOC-003](./phishing/SOC-003-internal-email-false-positive/) | Internal Email Phishing Alert | Phishing / Email | Medium | False Positive | None | False-positive analysis, email-content review, sender validation, detection-tuning awareness |
+| [SOC-004](./phishing/SOC-004-malicious-office-attachment-cve-2017-11882/) | Malicious Office Attachment / CVE-2017-11882 | Phishing / Malware | High | True Positive | T1566.001, T1203, T1105 | Malware analysis, exploit recognition, SIEM correlation, process/network analysis, EDR containment |
+
 
 ---
 
