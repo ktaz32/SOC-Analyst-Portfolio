@@ -2,7 +2,7 @@
 
 Welcome to my cybersecurity portfolio.
 
-This repository documents my practical development as a **Security Operations Center (SOC) Analyst**, with a focus on alert triage, phishing analysis, malicious-file investigation, SIEM/log correlation, endpoint containment, threat intelligence, MITRE ATT&CK mapping, and detection improvement.
+This repository documents my practical development as a **Security Operations Center (SOC) Analyst**, with a focus on alert triage, phishing analysis, malicious-file investigation, web-attack analysis, SIEM/log correlation, endpoint containment, network/PCAP analysis, DFIR, threat intelligence, MITRE ATT&CK mapping, and detection improvement.
 
 I have completed **CompTIA Security+** and am currently developing hands-on SOC experience through structured lab environments and the **LetsDefend SOC Analyst Learning Path**.
 
@@ -25,85 +25,37 @@ using sanitized evidence from authorized lab and simulated SOC environments.
 
 | Metric | Current Status |
 |---|---:|
-| Completed SOC Investigations | **4** |
-| True Positives | **3** |
-| False Positives | **1** |
-| Phishing / Email Investigations | **4** |
-| Cases with Threat-Intelligence Analysis | **3** |
-| Cases with Malware / Sandbox Analysis | **2** |
-| Cases Requiring Endpoint Containment | **2** |
-| Cases with MITRE ATT&CK Mapping | **3** |
+| SOC Alert Investigations | **11** |
+| Phishing / Email Cases | **5** |
+| Web Attack Cases | **6** |
+| Network / PCAP Cases | **1** |
+| DFIR Cases | **1** |
+| False-Positive Cases | **2** |
+| Total Documented Investigation Cases | **13** |
+
+> Counts will continue to grow as new investigations and technical projects are added.
 
 ---
 
 # Featured Investigations
 
-| Case | Investigation | Severity | Verdict | MITRE ATT&CK | Key Skills |
-|---|---|---:|---|---|---|
-| [SOC-001](./Investigations/phishing/SOC-001-phishing-url-detected/) | Phishing URL Detected | High | **True Positive** | T1204.001 | Proxy analysis, IOC enrichment, access validation, EDR containment |
-| [SOC-002](./Investigations/phishing/SOC-002-phishing-malicious-attachment/) | Malicious Phishing Attachment Blocked | Medium | **True Positive** | T1566.001 | Email analysis, threat intelligence, sandboxing, mail-flow validation |
-| [SOC-003](./Investigations/phishing/SOC-003-internal-email-false-positive/) | Internal Email Phishing Alert | Medium | **False Positive** | None | False-positive analysis, email review, detection-tuning awareness |
-| [SOC-004](./Investigations/phishing/SOC-004-malicious-office-attachment-cve-2017-11882/) | Malicious Office Attachment / CVE-2017-11882 | High | **True Positive** | T1566.001, T1203, T1105 | Malware analysis, exploit recognition, SIEM correlation, EDR containment |
+These are selected cases that best demonstrate investigation depth, evidence correlation, and defensive reasoning.
 
-> Each investigation is documented as an analyst case study rather than a step-by-step reproduction of the training platform.
+| Case | Investigation | Category | Severity | Verdict | MITRE ATT&CK | Key Skills |
+|---|---|---|---:|---|---|---|
+| [SOC-004](./Investigations/phishing/SOC-004-malicious-office-attachment-cve-2017-11882/) | Malicious Office Attachment / CVE-2017-11882 | Phishing / Malware | High | **True Positive** | T1566.001, T1203, T1105 | Malware analysis, exploit recognition, SIEM correlation, process/network analysis, EDR containment |
+| [SOC-008](./Investigations/web-attacks/SOC-008-successful-idor-attack/) | Successful IDOR Attack | Web Attack | Medium | **True Positive — Successful** | T1190 | IDOR analysis, object enumeration, response comparison, containment, escalation |
+| [SOC-011](./Investigations/web-attacks/SOC-011-successful-command-injection/) | Successful Command Injection / Host Compromise | Web Attack / Endpoint | High | **True Positive — Successful** | T1190, T1059.004, T1033, T1082, T1003.008 | Command injection, Linux endpoint telemetry, post-exploitation analysis, containment, Tier 2 escalation |
+| [PCAP-001](./Investigations/network/PCAP-001-http-basic-auth-analysis/) | HTTP Basic Authentication Exposure | Network / PCAP | — | **Security Finding** | None | Wireshark, HTTP stream reconstruction, fingerprinting, credential-exposure analysis |
+| [DFIR-001](./Investigations/dfir/DFIR-001-multi-stage-web-attack-investigation/) | Multi-Stage Web Attack Investigation | DFIR / Web Logs | High | **Successful Compromise with Persistence Attempt** | T1595.002, T1110.001, T1078, T1059, T1033, T1136.001 | Attack-chain reconstruction, Nikto detection, brute force, code injection, persistence analysis |
+
+> Full investigation coverage is available in the [Investigations index](./Investigations/).
 
 ---
 
 # Investigation Highlights
 
-## SOC-001 — Phishing URL Detected
-
-A malicious phishing URL was accessed from an internal endpoint.
-
-Key findings included:
-
-- malicious destination confirmed through reputation analysis
-- user and source host identified
-- proxy request confirmed as **Allowed**
-- actual user access verified
-- affected endpoint contained through EDR
-
-**Outcome:** True Positive
-
----
-
-## SOC-002 — Malicious Phishing Attachment Blocked
-
-A COVID-19-themed phishing email contained a password-protected malicious attachment.
-
-Analysis included:
-
-- email-content review
-- sender and SMTP investigation
-- attachment/hash reputation analysis
-- sandbox analysis
-- mail-delivery validation
-
-The email-security control successfully blocked the message before delivery.
-
-**Outcome:** True Positive / Successful Prevention
-
----
-
-## SOC-003 — Internal Email False Positive
-
-An internal-to-internal email triggered a phishing rule.
-
-Investigation confirmed:
-
-- normal internal sender and recipient
-- routine meeting request
-- no URL
-- no attachment
-- no malicious or social-engineering indicators
-
-The case was closed without unnecessary containment or ATT&CK mapping.
-
-**Outcome:** False Positive
-
----
-
-## SOC-004 — Malicious Office Attachment Exploiting CVE-2017-11882
+## SOC-004 — Malicious Office Attachment / CVE-2017-11882
 
 An invoice-themed phishing email containing a password-protected malicious Office attachment bypassed the email gateway.
 
@@ -123,33 +75,123 @@ The malicious message was deleted and the endpoint was contained.
 
 ---
 
+## SOC-008 — Successful IDOR Attack
+
+An external source repeatedly queried the same object endpoint while changing `user_id` values.
+
+Investigation identified:
+
+- sequential object enumeration
+- repeated HTTP `200` responses
+- varying response sizes
+- external-to-internal attack direction
+- successful unauthorized object-access pattern
+
+The target web server was contained and the case required escalation.
+
+**Outcome:** True Positive / Successful IDOR Exploitation
+
+---
+
+## SOC-011 — Successful Command Injection / Host Compromise
+
+An external attacker submitted commands through a vulnerable POST parameter:
+
+```text
+ls
+whoami
+uname
+cat /etc/passwd
+cat /etc/shadow
+```
+
+Endpoint Security terminal history independently confirmed execution of multiple attacker-supplied commands.
+
+The sequence progressed from command-execution validation to:
+
+- user discovery
+- system discovery
+- local-account enumeration
+- attempted access to credential material
+
+The affected Linux web server was contained and the incident was escalated to Tier 2.
+
+**Outcome:** True Positive / Confirmed Host Compromise
+
+---
+
+## PCAP-001 — HTTP Basic Authentication Exposure
+
+A packet capture was analyzed in Wireshark.
+
+Analysis identified:
+
+- 5 HTTP GET requests
+- FreeBSD server fingerprint
+- Apache/2.2.15
+- OpenSSL/0.9.8n
+- Lynx client User-Agent
+- HTTP Basic Authentication credentials recoverable from plaintext traffic
+
+The credential password was intentionally redacted from the public report.
+
+**Finding:** Plaintext HTTP exposed reusable Basic Authentication credentials.
+
+---
+
+## DFIR-001 — Multi-Stage Web Attack Investigation
+
+Raw web access logs were analyzed to reconstruct an entire attack chain:
+
+```text
+Nikto reconnaissance
+        ↓
+Directory brute force
+        ↓
+Login brute force
+        ↓
+Successful authentication
+        ↓
+Code injection
+        ↓
+System command execution
+        ↓
+Persistence attempt
+```
+
+**Outcome:** Successful Multi-Stage Web Compromise with Persistence Attempt
+
+---
+
 # Investigation Methodology
 
 My investigations generally follow this workflow:
 
 ```text
-Alert
-  ↓
+Alert / Evidence Source
+        ↓
 Initial Triage
-  ↓
+        ↓
 Evidence Collection
-  ↓
+        ↓
 Log / Telemetry Analysis
-  ↓
+        ↓
 Threat Intelligence / IOC Enrichment
-  ↓
-Static / Dynamic Analysis
-  ↓
+        ↓
+Static / Dynamic / Packet Analysis
+        ↓
+Timeline Reconstruction
+        ↓
 Scope Assessment
-  ↓
+        ↓
 MITRE ATT&CK Mapping
-  ↓
+        ↓
 Analyst Decision
-  ↓
-Containment / Remediation
-  ↓
+        ↓
+Containment / Escalation / Remediation
+        ↓
 Detection Improvement
-  ↓
+        ↓
 Case Closure
 ```
 
@@ -158,9 +200,12 @@ I avoid relying on a single indicator, reputation score, or alert label.
 Findings are based on correlation between:
 
 - SIEM telemetry
-- mail-security data
+- email-security data
 - proxy/network logs
+- firewall and web-server logs
 - endpoint evidence
+- browser and terminal history
+- packet captures
 - sandbox behavior
 - threat intelligence
 - user and host context
@@ -209,12 +254,22 @@ Each ATT&CK mapping should answer:
 
 > What evidence in this investigation supports this technique?
 
-Examples from completed cases include:
+Techniques observed across current cases include:
 
 - **T1566.001 — Spearphishing Attachment**
+- **T1566.002 — Spearphishing Link**
 - **T1204.001 — User Execution: Malicious Link**
 - **T1203 — Exploitation for Client Execution**
 - **T1105 — Ingress Tool Transfer**
+- **T1190 — Exploit Public-Facing Application**
+- **T1059.004 — Command and Scripting Interpreter: Unix Shell**
+- **T1033 — System Owner/User Discovery**
+- **T1082 — System Information Discovery**
+- **T1003.008 — OS Credential Dumping: `/etc/passwd` and `/etc/shadow`**
+- **T1595.002 — Active Scanning: Vulnerability Scanning**
+- **T1110.001 — Brute Force: Password Guessing**
+- **T1078 — Valid Accounts**
+- **T1136.001 — Create Account: Local Account**
 
 If no malicious adversary behavior is established, no ATT&CK technique is assigned.
 
@@ -224,33 +279,97 @@ If no malicious adversary behavior is established, no ATT&CK technique is assign
 
 ## Phishing & Email Security
 
-Current investigations include:
-
-- phishing URLs
-- malicious attachments
-- internal-to-internal email alerts
-- Office-document exploitation
-- email-delivery validation
-- SMTP/source analysis
-- sandbox analysis
+Current work includes phishing URLs, malicious attachments, credential-phishing links, internal-email false positives, Office-document exploitation, email-delivery validation, SMTP/source analysis, URL analysis, and sandbox analysis.
 
 Location:
 
 `Investigations/phishing/`
 
+Current cases:
+
+```text
+SOC-001 through SOC-005
+```
+
+---
+
+## Web Attack Analysis
+
+Current investigations include:
+
+- Local File Inclusion / directory traversal
+- SQL injection
+- IDOR
+- Cross-Site Scripting
+- command injection
+- web-detection false positives
+- successful host compromise
+- Tier 2 escalation decisions
+
+Location:
+
+`Investigations/web-attacks/`
+
+Current cases:
+
+```text
+SOC-006 through SOC-011
+```
+
+---
+
+## Network / PCAP Analysis
+
+Current network-analysis work includes:
+
+- Wireshark display filters
+- HTTP stream reconstruction
+- server fingerprinting
+- client fingerprinting
+- HTTP header analysis
+- Basic Authentication analysis
+- credential-exposure assessment
+
+Location:
+
+`Investigations/network/`
+
+Current cases:
+
+```text
+PCAP-001
+```
+
+---
+
+## DFIR
+
+Current DFIR work includes:
+
+- raw web access-log analysis
+- attack-chain reconstruction
+- automated scanner identification
+- directory brute-force detection
+- authentication brute-force analysis
+- successful-login validation
+- code-injection analysis
+- persistence identification
+
+Location:
+
+`Investigations/dfir/`
+
+Current cases:
+
+```text
+DFIR-001
+```
+
 ---
 
 ## Malware Analysis
 
-Current experience includes:
-
-- archive analysis
-- file hashes
-- malicious Office documents
-- sandbox analysis
-- process behavior
-- exploit identification
-- network activity following execution
+Current experience includes archive analysis, file hashes, malicious Office documents, sandbox analysis, exploit identification, process behavior, and post-execution network activity.
 
 Future malware-specific cases will be stored under:
 
@@ -258,34 +377,16 @@ Future malware-specific cases will be stored under:
 
 ---
 
-## SIEM & Log Analysis
+## SIEM & Endpoint Analysis
 
-Completed investigations have included:
+Completed investigations have included proxy telemetry, Exchange logs, firewall logs, source/destination correlation, process-linked network events, browser history, terminal history, endpoint containment, timeline reconstruction, and validation of blocked vs allowed activity.
 
-- proxy telemetry
-- Exchange logs
-- source/destination correlation
-- process-linked network events
-- timeline reconstruction
-- validation of blocked vs allowed activity
+Future dedicated cases will be stored under:
 
-Future SIEM-focused investigations will be stored under:
-
-`Investigations/siem/`
-
----
-
-## Future Investigation Areas
-
-As the portfolio develops, additional categories will include:
-
-- Web attacks
-- Authentication attacks
-- Network investigations
-- Endpoint investigations
-- Malware investigations
-- Brute-force / password-spraying investigations
-- Detection-engineering cases
+```text
+Investigations/siem/
+Investigations/endpoint/
+```
 
 ---
 
@@ -305,7 +406,15 @@ Current detection concepts derived from investigations include:
 - phishing campaign correlation
 - Office application → `EQNEDT32.EXE`
 - `EQNEDT32.EXE` making outbound network connections
-- internal-email phishing detection without blanket allowlisting
+- contextual internal-email phishing detection
+- directory-brute-force detection using request volume and `404` ratios
+- SQL injection pattern detection
+- XSS payload recognition
+- IDOR object-enumeration behavior
+- command-injection detection using parameter and shell context
+- web-service processes reading `/etc/passwd` or `/etc/shadow`
+- Basic Authentication observed over plaintext HTTP
+- rule tuning to avoid substring false positives such as `ls` inside `skills`
 
 Detection content will expand under:
 
@@ -377,6 +486,7 @@ Current topics include:
 - Cyber Kill Chain
 - MITRE ATT&CK
 - Phishing Email Analysis
+- Web Attack Detection
 
 These notes are written as practical analyst references rather than certification study dumps.
 
@@ -398,21 +508,29 @@ These notes are written as practical analyst references rather than certificatio
 ## Platforms & Tools
 
 - LetsDefend
+- Wireshark
 - VirusTotal
 - ANY.RUN
 - Hybrid Analysis
-- Talos Intelligence
+- Cisco Talos
 - AbuseIPDB
 - MITRE ATT&CK
+- CyberChef
 
 ## Analysis Areas
 
 - Exchange / email telemetry
 - Proxy logs
-- Network telemetry
+- Firewall logs
+- Web access logs
+- HTTP traffic
+- PCAP analysis
 - File hashes
 - Office-document analysis
+- Linux command activity
 - Endpoint process activity
+- Browser history
+- Terminal history
 - Sandbox behavior
 - IOC correlation
 
@@ -443,20 +561,30 @@ Completed or currently covered areas include:
 - MITRE ATT&CK
 - Phishing Email Analysis
 - Phishing alert investigations
+- Web Attack Detection
+- SQL Injection analysis
+- XSS analysis
+- IDOR analysis
+- LFI / directory traversal
+- Command Injection
 - Threat-intelligence enrichment
 - Sandbox analysis
 - Endpoint containment
 - SIEM/log correlation
+- Wireshark / PCAP analysis
+- DFIR-style web-log investigation
 
 Future learning areas include:
 
-- Web attack detection
-- SIEM investigation
-- Malware analysis
-- Network log analysis
+- advanced SIEM investigation
+- malware analysis
+- network log analysis
 - Splunk
-- Cyber threat intelligence
-- Brute-force detection
+- cyber threat intelligence
+- authentication attack investigations
+- brute-force / password-spraying detection
+- Windows endpoint investigation
+- Active Directory
 - SOC lab development
 
 ---
@@ -518,11 +646,27 @@ SOC-Analyst-Portfolio/
 │
 ├── Investigations/
 │   ├── README.md
-│   └── phishing/
-│       ├── SOC-001-phishing-url-detected/
-│       ├── SOC-002-phishing-malicious-attachment/
-│       ├── SOC-003-internal-email-false-positive/
-│       └── SOC-004-malicious-office-attachment-cve-2017-11882/
+│   │
+│   ├── phishing/
+│   │   ├── SOC-001-phishing-url-detected/
+│   │   ├── SOC-002-phishing-malicious-attachment/
+│   │   ├── SOC-003-internal-email-false-positive/
+│   │   ├── SOC-004-malicious-office-attachment-cve-2017-11882/
+│   │   └── SOC-005-paypal-phishing-link-challenge/
+│   │
+│   ├── web-attacks/
+│   │   ├── SOC-006-lfi-directory-traversal/
+│   │   ├── SOC-007-sql-injection-attempt/
+│   │   ├── SOC-008-successful-idor-attack/
+│   │   ├── SOC-009-xss-attempt/
+│   │   ├── SOC-010-false-positive-ls-command-detection/
+│   │   └── SOC-011-successful-command-injection/
+│   │
+│   ├── network/
+│   │   └── PCAP-001-http-basic-auth-analysis/
+│   │
+│   └── dfir/
+│       └── DFIR-001-multi-stage-web-attack-investigation/
 │
 ├── detection-engineering/
 │   └── README.md
@@ -534,7 +678,8 @@ SOC-Analyst-Portfolio/
 │   ├── README.md
 │   ├── cyber-kill-chain.md
 │   ├── mitre-attack/
-│   └── phishing-email-analysis/
+│   ├── phishing-email-analysis/
+│   └── web-attack-detection/
 │
 └── templates/
     └── investigation-template.md
@@ -548,15 +693,21 @@ My current objective is to continue building practical SOC capability by repeate
 
 **Detection → Triage → Investigation → Analysis → Scope → Response → Detection Improvement**
 
-The next stages of this portfolio will expand beyond phishing into:
+The next stages of this portfolio will expand further into:
 
-- Web attacks
-- SIEM investigations
-- Authentication attacks
-- Malware analysis
-- Network investigations
+- malware analysis
+- Windows endpoint investigations
+- Active Directory
+- authentication attacks
+- SIEM correlation
 - Splunk
-- Detection engineering
+- detection engineering
+- threat hunting
+- incident response
+- Linux security
+- Python security tooling
+- Bash automation
+- DFIR
 - SOC lab development
 
 This repository will continue to evolve as my hands-on investigation experience develops.
