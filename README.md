@@ -47,7 +47,7 @@ These are selected cases that best demonstrate investigation depth, evidence cor
 | [SOC-008](./Investigations/web-attacks/SOC-008-successful-idor-attack/) | Successful IDOR Attack | Web Attack | Medium | **True Positive — Successful** | T1190 | IDOR analysis, object enumeration, response comparison, containment, escalation |
 | [SOC-011](./Investigations/web-attacks/SOC-011-successful-command-injection/) | Successful Command Injection / Host Compromise | Web Attack / Endpoint | High | **True Positive — Successful** | T1190, T1059.004, T1033, T1082, T1003.008 | Command injection, Linux endpoint telemetry, post-exploitation analysis, containment, Tier 2 escalation |
 | [PCAP-001](./Investigations/network/PCAP-001-http-basic-auth-analysis/) | HTTP Basic Authentication Exposure | Network / PCAP | — | **Security Finding** | None | Wireshark, HTTP stream reconstruction, fingerprinting, credential-exposure analysis |
-| [DFIR-001](./Investigations/dfir/DFIR-001-multi-stage-web-attack-investigation/) | Multi-Stage Web Attack Investigation | DFIR / Web Logs | High | **Successful Compromise with Persistence Attempt** | T1595.002, T1110.001, T1078, T1059, T1033, T1136.001 | Attack-chain reconstruction, Nikto detection, brute force, code injection, persistence analysis |
+| [DFIR-001](./Investigations/DFIR/DFIR-001-multi-stage-web-attack-investigation/) | Multi-Stage Web Attack Investigation | DFIR / Web Logs | High | **Successful Compromise with Persistence Attempt** | T1595.002, T1110.001, T1078, T1059, T1033, T1136.001 | Attack-chain reconstruction, Nikto detection, brute force, code injection, persistence analysis |
 
 > Full investigation coverage is available in the [Investigations index](./Investigations/).
 
