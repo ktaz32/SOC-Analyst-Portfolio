@@ -6,7 +6,7 @@ A web-server access log was analyzed to reconstruct a multi-stage attack sequenc
 
 The evidence shows a clear progression:
 
-```text
+`text
 Automated reconnaissance
         ↓
 Directory brute force
@@ -20,7 +20,7 @@ Code injection
 System command execution
         ↓
 Persistence attempt via local-user creation
-```
+`
 
 The attacker first used **Nikto** for automated reconnaissance, then performed **directory brute forcing** against application paths. This was followed by repeated POST requests to the login endpoint, indicating a **credential brute-force attack**.
 
