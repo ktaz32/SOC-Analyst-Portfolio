@@ -37,6 +37,74 @@ using sanitized evidence from authorized lab and simulated SOC environments.
 
 ---
 
+# Featured Projects
+
+These standalone repositories complement the investigation work in this portfolio and demonstrate broader defensive-security engineering skills.
+
+| Project | Focus | Highlights |
+|---|---|---|
+| [Detection-as-Code Pipeline](https://github.com/ktaz32/Detection-as-Code-Pipeline) | Detection Engineering / DevSecOps | Sigma detections, positive/negative behavioral tests, Python validation, GitHub Actions CI, MITRE ATT&CK mapping, correlation detections, analyst playbooks |
+| [AWS Cloud Security Assessment](https://github.com/ktaz32/AWS-Cloud-Security-Assessment) | Cloud Security / AWS | IAM least privilege, S3 access-control review, resource-policy analysis, security-group remediation, CloudTrail investigation, evidence-driven security assessments |
+
+## Detection-as-Code Pipeline
+
+The **Detection-as-Code Pipeline** treats security detections as testable software rather than static rule files.
+
+The project includes:
+
+- Sigma-based Windows detections
+- positive and negative behavioral test fixtures
+- automated Python validation
+- GitHub Actions CI
+- Windows Security Event and Sysmon telemetry
+- single-event and correlation detections
+- MITRE ATT&CK mapping
+- false-positive and tuning analysis
+- analyst investigation playbooks
+
+The workflow follows:
+
+```text
+Define threat behavior
+        ↓
+Identify telemetry
+        ↓
+Write detection
+        ↓
+Create positive + negative fixtures
+        ↓
+Automate behavioral testing
+        ↓
+Validate in CI
+        ↓
+Document ATT&CK + false positives
+        ↓
+Provide analyst investigation playbook
+        ↓
+Tune based on evidence
+```
+
+This project demonstrates the engineering side of SOC operations: turning attacker behavior and investigative lessons into **version-controlled, tested, explainable detections**.
+
+## AWS Cloud Security Assessment
+
+The **AWS Cloud Security Assessment** repository documents hands-on cloud-security review and remediation work across AWS services.
+
+Current assessment areas include:
+
+- IAM over-permissioning and least-privilege remediation
+- S3 identity-policy scoping
+- S3 bucket-policy analysis
+- unintended resource-based access
+- EC2 security-group exposure
+- CloudTrail IAM / `AssumeRole` investigation
+- before-and-after evidence collection
+- security findings and remediation validation
+
+Together, these projects complement the SOC investigations by demonstrating both **detection engineering** and **cloud security assessment** capability.
+
+---
+
 # Featured Investigations
 
 These are selected cases that best demonstrate investigation depth, evidence correlation, and defensive reasoning.
@@ -416,14 +484,19 @@ Current detection concepts derived from investigations include:
 - Basic Authentication observed over plaintext HTTP
 - rule tuning to avoid substring false positives such as `ls` inside `skills`
 
-Detection content will expand under:
+Investigation-derived detection ideas are documented under:
 
 `detection-engineering/`
 
-Planned formats include:
+A separate **[Detection-as-Code Pipeline](https://github.com/ktaz32/Detection-as-Code-Pipeline)** extends this work into tested, version-controlled detection engineering with Sigma rules, Python validation, behavioral fixtures, GitHub Actions CI, ATT&CK mapping, and analyst playbooks.
 
-- Splunk SPL
+Current and developing formats include:
+
 - Sigma
+- Python-based detection validation
+- positive and negative test fixtures
+- GitHub Actions CI
+- Splunk SPL
 - YARA
 - detection hypotheses
 - false-positive analysis
@@ -483,12 +556,15 @@ Operational SOC notes are stored under:
 
 Current topics include:
 
-- Cyber Kill Chain
-- MITRE ATT&CK
-- Phishing Email Analysis
-- Web Attack Detection
+- **Cyber Kill Chain** — attack-stage analysis and investigation pivots
+- **MITRE ATT&CK** — tactics, techniques, procedures, mitigations, groups, and evidence-based mapping
+- **Phishing Email Analysis** — sender validation, header analysis, URL/attachment analysis, and phishing triage
+- **Detecting Web Attacks** — HTTP fundamentals, SQL injection, XSS, access-log analysis, and web-attack detection concepts
+- **Detecting Web Attacks 2** — brute force, directory traversal, open redirection, XXE, and defensive detection patterns
+- **SIEM Alert Investigation Workflow** — alert triage, case ownership, evidence collection, log pivots, EDR analysis, scoping, containment, verdict, closure, and detection improvement
+- **Malware Analysis Fundamentals** — static vs dynamic analysis, sandboxing, process-tree analysis, persistence, credential theft, network behavior, IOC extraction, and detection opportunities
 
-These notes are written as practical analyst references rather than certification study dumps.
+These notes are written as practical analyst references rather than certification study dumps. The knowledge base is designed to support the investigation methodology used throughout the portfolio and to capture reusable operational concepts encountered during hands-on work.
 
 ---
 
@@ -536,10 +612,15 @@ These notes are written as practical analyst references rather than certificatio
 
 ## Detection Engineering
 
-Planned and developing:
+Current and developing:
 
-- Splunk SPL
 - Sigma
+- Python detection validation
+- GitHub Actions CI
+- positive / negative behavioral testing
+- correlation detections
+- analyst playbooks
+- Splunk SPL
 - YARA
 
 ---
@@ -571,13 +652,17 @@ Completed or currently covered areas include:
 - Sandbox analysis
 - Endpoint containment
 - SIEM/log correlation
+- SIEM alert investigation workflow
+- Malware analysis fundamentals
+- Static vs dynamic malware analysis
+- Sandbox/process-tree analysis
 - Wireshark / PCAP analysis
 - DFIR-style web-log investigation
 
 Future learning areas include:
 
-- advanced SIEM investigation
-- malware analysis
+- advanced SIEM correlation and threat hunting
+- deeper malware reverse engineering
 - network log analysis
 - Splunk
 - cyber threat intelligence
@@ -676,10 +761,13 @@ SOC-Analyst-Portfolio/
 │
 ├── knowledge/
 │   ├── README.md
-│   ├── cyber-kill-chain.md
-│   ├── mitre-attack/
-│   ├── phishing-email-analysis/
-│   └── web-attack-detection/
+│   ├── cyber-kill-chain/
+│   ├── MITRE-ATT&CK/
+│   ├── Phishing-email-analysis/
+│   ├── detecting-web-attacks/
+│   ├── detecting-web-attacks-2/
+│   ├── siem-alert-investigation/
+│   └── malware-analysis-fundamentals/
 │
 └── templates/
     └── investigation-template.md
