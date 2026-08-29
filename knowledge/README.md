@@ -1,160 +1,31 @@
 # SOC Knowledge Base
 
-This directory contains concise technical reference material that supports my practical SOC investigations.
+This directory contains operational reference material that supports the investigations in this portfolio.
 
-The purpose of this section is to maintain **operational analyst notes** that can be referenced during investigations rather than reproduce certification study material or training-platform walkthroughs.
+The goal is not to reproduce course notes. Each reference is written around the questions a SOC analyst needs to answer during an investigation:
 
-The notes focus on:
-
-- how security concepts appear in real telemetry
-- what evidence an analyst should look for
-- how to distinguish suspicious activity from confirmed malicious behavior
-- how concepts connect to SIEM, EDR, network, email, and web investigations
-- how to document findings without overstating the evidence
+- What telemetry matters?
+- What behavior is normal?
+- What makes an event suspicious?
+- What evidence would confirm the activity?
+- What cannot be concluded from the available data?
+- How should the behavior be mapped to MITRE ATT&CK?
+- What detection opportunities follow from the investigation?
 
 ---
 
 # Current Knowledge References
 
-## Cyber Kill Chain
-
-Location:
-
-`cyber-kill-chain.md`
-
-Covers:
-
-- Reconnaissance
-- Weaponization
-- Delivery
-- Exploitation
-- Installation
-- Command and Control
-- Actions on Objectives
-
-The emphasis is on using the Kill Chain to investigate **backward and forward from an observed event**, rather than simply assigning a stage label.
-
----
-
-## MITRE ATT&CK
-
-Location:
-
-`mitre-attack/`
-
-Covers:
-
-- ATT&CK matrices
-- tactics
-- techniques
-- sub-techniques
-- procedures
-- mitigations
-- threat groups
-- software
-- evidence-based ATT&CK mapping
-
-Key analyst principle:
-
-> ATT&CK mappings should describe behavior supported by evidence, not assumptions based on an alert name or malware family.
-
----
-
-## Phishing Email Analysis
-
-Location:
-
-`phishing-email-analysis/`
-
-Covers:
-
-- sender and infrastructure analysis
-- raw email-header interpretation
-- Received-chain analysis
-- SPF, DKIM, and DMARC
-- From / Return-Path / Reply-To comparison
-- suspicious URLs
-- attachment analysis
-- static analysis
-- sandbox / dynamic analysis
-- cloud-hosting abuse
-- phishing IOC enrichment
-- delivery and user-impact assessment
-
-Key analyst principles include:
-
-- reputation alone does not determine a verdict
-- an SPF pass does not automatically make an email legitimate
-- trusted cloud infrastructure can host malicious content
-- user interaction should not be assumed without telemetry
-
----
-
-## Detecting Web Attacks
-
-Location:
-
-`detecting-web-attacks/`
-
-Covers:
-
-- HTTP request and response analysis
-- web-server access logs
-- URL encoding and decoding
-- SQL Injection
-- Cross-Site Scripting (XSS)
-- Command Injection
-- Insecure Direct Object Reference (IDOR)
-- Local File Inclusion (LFI)
-- Remote File Inclusion (RFI)
-- automated scanner detection
-- attack-success assessment
-
-The web-attack notes emphasize distinguishing:
-
-```text
-Attack Attempt
-      ↓
-Exploitation Attempt
-      ↓
-Successful Exploitation
-      ↓
-Confirmed Impact
-```
-
-A malicious request does not automatically prove that exploitation succeeded.
-
----
-
-# Investigation-Oriented Methodology
-
-These notes are written to support the following analyst workflow:
-
-```text
-Alert
-  ↓
-Understand the technology
-  ↓
-Identify expected behavior
-  ↓
-Identify the anomaly
-  ↓
-Collect relevant telemetry
-  ↓
-Decode / normalize evidence
-  ↓
-Correlate across data sources
-  ↓
-Determine attack technique
-  ↓
-Assess success and impact
-  ↓
-Map supported ATT&CK behavior
-  ↓
-Document findings
-```
-
-The goal is to understand **why activity is suspicious**, not simply recognize a keyword.
+| Topic | Location | Practical Focus |
+|---|---|---|
+| Cyber Kill Chain | [`cyber-kill-chain/`](./cyber-kill-chain/) | Investigation pivots across attack stages |
+| MITRE ATT&CK | [`MITRE-ATT&CK/`](./MITRE-ATT&CK/) | Evidence-based tactics/techniques/sub-techniques mapping |
+| Phishing Email Analysis | [`Phishing-email-analysis/`](./Phishing-email-analysis/) | Headers, sender validation, URLs, attachments, delivery impact |
+| Detecting Web Attacks | [`detecting-web-attacks/`](./detecting-web-attacks/) | HTTP, SQLi, XSS, IDOR, LFI, response analysis |
+| Detecting Web Attacks 2 | [`detecting-web-attacks-2/`](./detecting-web-attacks-2/) | Brute force, traversal, open redirect, XXE, defensive patterns |
+| SIEM Alert Investigation | [`siem-alert-investigation/`](./siem-alert-investigation/) | Triage, evidence pivots, scoping, verdict, closure |
+| Malware Analysis Fundamentals | [`malware-analysis-fundamentals/`](./malware-analysis-fundamentals/) | Static/dynamic analysis, sandboxing, processes, persistence, network behavior |
+| Dynamic Malware Analysis | [`dynamic-malware-analysis/`](./dynamic-malware-analysis/) | Process Hacker, Procmon, Regshot, Wireshark, Fiddler, persistence, timelines |
 
 ---
 
@@ -162,390 +33,214 @@ The goal is to understand **why activity is suspicious**, not simply recognize a
 
 ## Evidence Before Conclusion
 
-A detection rule or reputation score is the beginning of an investigation, not the final verdict.
+A detection rule, IOC reputation result, or automated sandbox verdict is the beginning of analysis.
 
-Where possible, conclusions should be based on correlation between:
+Where possible, correlate:
 
-- alert telemetry
-- SIEM logs
-- endpoint data
-- network activity
-- email telemetry
-- HTTP requests
-- sandbox behavior
-- threat intelligence
-- user and host context
-
----
+```text
+Alert
+ + SIEM logs
+ + Endpoint telemetry
+ + Network activity
+ + Sandbox behavior
+ + Threat intelligence
+ + User / host context
+```
 
 ## Evidence vs Inference
 
-Investigation notes should distinguish:
-
 ### Direct Evidence
-
-What logs or artifacts explicitly show.
+What the logs or artifacts explicitly show.
 
 ### Analyst Inference
-
-What can reasonably be concluded from those observations.
+What can reasonably be concluded.
 
 ### Not Established
+What cannot be proven.
 
-What cannot be proven with the available evidence.
-
-This prevents unsupported claims about:
+This distinction prevents unsupported claims about:
 
 - exploitation success
+- malware execution
+- C2
 - persistence
 - credential compromise
 - lateral movement
-- command and control
 - exfiltration
 
----
-
-## Detection Is Not the Same as Compromise
-
-Examples:
+## Detection Is Not Compromise
 
 ```text
-SQL injection payload observed
-≠
-database compromise confirmed
-```
-
-```text
-XSS payload observed
-≠
-JavaScript execution confirmed
-```
-
-```text
-phishing email received
-≠
-user clicked the link
+SQLi payload observed
+≠ database compromise confirmed
 ```
 
 ```text
 malicious attachment delivered
-≠
-malware executed
+≠ malware execution confirmed
 ```
-
-Each stage requires supporting evidence.
-
----
-
-# HTTP and Web Analysis Reference
-
-For web investigations, important fields include:
-
-| Field | Analyst Value |
-|---|---|
-| Source IP | Identifies request origin |
-| HTTP Method | GET, POST, PUT, etc. |
-| URI | Identifies target resource |
-| Query Parameters | Common attack location |
-| Request Body | Important for POST-based attacks |
-| User-Agent | Can reveal browsers or automated tools |
-| Cookie | May contain session information |
-| Response Code | Helps assess application behavior |
-| Response Size | May indicate different application responses |
-| Request Frequency | Helps identify automation |
-| Timestamp | Supports timeline construction |
-
-Web payloads should be decoded before classification whenever encoding or obfuscation is present.
-
----
-
-# Common Web Attack Indicators
-
-## SQL Injection
-
-Common indicators:
 
 ```text
-SELECT
-UNION
-AND
-OR
-WHERE
-EXTRACTVALUE
-CAST
-CHR
-'
---
-%27
+outbound connection observed
+≠ C2 automatically confirmed
 ```
-
----
-
-## Cross-Site Scripting
-
-Common indicators:
 
 ```text
-<script>
-alert(
-prompt(
-document.cookie
-console.log(
-%3Cscript%3E
+SMTP session observed
+≠ data exfiltration automatically confirmed
 ```
 
 ---
 
-## Command Injection
-
-Common indicators:
+# Investigation-Oriented Workflow
 
 ```text
-whoami
-ls
-dir
-cat
-id
-uname
-;
-&&
-||
-|
+Understand technology
+        ↓
+Identify expected behavior
+        ↓
+Identify anomaly
+        ↓
+Collect relevant telemetry
+        ↓
+Normalize / decode
+        ↓
+Correlate sources
+        ↓
+Assess success and impact
+        ↓
+Map supported ATT&CK behavior
+        ↓
+Document verdict + confidence
+        ↓
+Identify detection improvements
 ```
 
 ---
 
-## IDOR
+# Malware Analysis Reference Areas
 
-Common patterns:
+The knowledge base now includes both malware-analysis fundamentals and a dedicated dynamic-analysis guide.
 
-```text
-?id=1
-?id=2
-?id=3
-```
+Current coverage includes:
 
-or repeated enumeration such as:
-
-```text
-user_id=15
-user_id=16
-user_id=17
-```
-
----
-
-## Local File Inclusion
-
-Common indicators:
-
-```text
-../
-../../
-../../../etc/passwd
-/etc/shadow
-```
-
----
-
-## Remote File Inclusion
-
-Common indicators:
-
-```text
-?page=http://external-host/file
-?page=https://external-host/payload
-```
-
----
-
-# Email Analysis Reference
-
-Important fields include:
-
-- From
-- To
-- Subject
-- Return-Path
-- Reply-To
-- Message-ID
-- Received
-- Authentication-Results
-- SPF
-- DKIM
-- DMARC
-- attachment hashes
-- embedded URLs
-
-Email legitimacy should be evaluated through **identity alignment and telemetry correlation**, not a single authentication result.
-
----
-
-# IOC Handling
-
-Not every collected artifact is malicious.
-
-Examples of case context that may be benign include:
-
-- internal IP addresses
-- legitimate organizational domains
-- internal users
-- trusted cloud platforms
-- normal mail servers
-
-Indicators should be classified according to evidence.
-
-Useful IOC categories include:
-
-- malicious
-- suspicious
-- benign
-- internal context
-- unverified
+- file hashes and reputation
+- static vs dynamic analysis
+- malicious Office documents
+- VBA/macros
+- sandbox analysis
+- process trees
+- short-lived child processes
+- Procmon filtering
+- file-system activity
+- `%TEMP%`, `%APPDATA%`, Startup locations
+- Run / RunOnce persistence
+- scheduled tasks
+- WMI
+- Process Hacker
+- Regshot
+- Wireshark
+- Fiddler
+- DNS / HTTP / SMTP analysis
+- dropped payloads
+- ransomware recovery inhibition
+- anti-analysis / delayed execution
+- IOC extraction
+- behavioral detection opportunities
 
 ---
 
 # Detection Engineering Mindset
 
-These notes are also used to identify detection opportunities.
-
-Rather than detecting only exact strings, I try to identify behavioral patterns.
+The knowledge material is also used to derive detection hypotheses.
 
 Examples:
-
-### Phishing
-
-```text
-external sender
-+
-brand mismatch
-+
-suspicious URL
-+
-user interaction
-```
-
-### SQL Injection
-
-```text
-SQL syntax
-+
-encoded special characters
-+
-same vulnerable parameter
-+
-high request frequency
-```
-
-### IDOR
-
-```text
-same endpoint
-+
-many changing object IDs
-+
-short time window
-```
-
-### Exploit Activity
 
 ```text
 Office process
 +
 unexpected child process
 +
-outbound connection
+outbound network connection
 ```
 
-Detection logic should also consider:
+```text
+unknown executable
++
+AppData file creation
++
+Run-key modification
++
+outbound SMTP
+```
 
+```text
+rare executable
++
+shadow-copy deletion
++
+mass file modification
+```
+
+Strong detections should consider:
+
+- expected baselines
 - false positives
-- environmental baselines
-- request rate
-- response behavior
-- correlation across data sources
+- process ancestry
+- time windows
+- multiple telemetry sources
+- negative test cases
+- tuning boundaries
 
 ---
 
-# Topics Covered
-
-Current knowledge areas include:
+# Current Topics
 
 - SOC fundamentals
 - Cyber Kill Chain
 - MITRE ATT&CK
-- phishing analysis
-- email authentication
+- phishing / email
 - HTTP fundamentals
 - web-server logs
 - SQL injection
 - XSS
-- command injection
 - IDOR
 - LFI / RFI
-- malware-analysis concepts
+- brute force
+- malware-analysis fundamentals
+- dynamic malware analysis
+- process / file / registry / network behavior
+- persistence
 - IOC enrichment
-- incident-response methodology
-- evidence handling
+- SIEM investigation
+- incident response
 - detection engineering
 
 ---
 
-# Future Knowledge Areas
+# Future Expansion
 
-As the portfolio develops, this section may expand to include:
+Planned areas include:
 
 - Windows Event IDs
-- Windows authentication telemetry
-- Active Directory
 - Sysmon
 - PowerShell logging
-- endpoint process trees
-- DNS analysis
-- firewall analysis
-- network protocols
-- malware behavior
-- persistence mechanisms
-- privilege escalation
-- lateral movement
+- Active Directory
+- authentication attacks
+- DNS / firewall analysis
+- threat hunting
 - Splunk SPL
 - Sigma
 - YARA
-- threat hunting
-
----
-
-# Repository Structure
-
-```text
-knowledge/
-│
-├── README.md
-│
-├── cyber-kill-chain
-|   ├── cyber-kill-chain.md
-│
-├── mitre-attack/
-│   ├── mitre-attack.md
-│   └── assets/
-│
-├── phishing-email-analysis/
-│   ├── phishing-email-analysis.md
-│   └── assets/
-│
-└── detecting-web-attacks/
-    ├── README.md
-    └── images/
-```
+- memory forensics
+- disk forensics
 
 ---
 
 # Purpose
 
-The knowledge base exists to support the investigation workflow:
+The knowledge base supports the portfolio workflow:
 
-**Understand → Detect → Investigate → Validate → Scope → Respond → Improve Detection**
+**Understand → Detect → Investigate → Validate → Scope → Respond → Improve**
 
-Notes are updated as concepts are encountered during hands-on SOC investigations and training.
-
-The emphasis remains on **practical analyst reasoning and evidence interpretation**, not memorization.
+The emphasis remains on practical analyst reasoning and evidence interpretation.
