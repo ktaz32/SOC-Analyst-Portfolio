@@ -2,471 +2,403 @@
 
 ## Purpose
 
-This reference documents a practical Splunk workflow for SOC analysts, using the lab screenshots as evidence of the tasks performed.
+This knowledge base documents the complete Splunk lab workflow in the same sequence as the source material, with each screenshot placed beside the task it actually demonstrates.
 
-The focus is on the analyst-facing lifecycle:
+It covers:
+
+- Splunk platform basics
+- Windows and Linux installation checks
+- Splunk Universal Forwarder
+- forwarding Windows Event Logs
+- indexes and receiving on TCP 9997
+- manual file upload
+- searching and time-range control
+- field discovery and pivots
+- SPL aggregation
+- Windows failed-logon investigation
+- reports
+- alerts
+- dashboards
+- Splunk health
+- roles, users, and password management
+
+> **Portfolio note:** The focus here is analyst workflow and operational understanding rather than quiz answers.
+
+---
+
+# 1. Splunk Overview
+
+Splunk is a data platform used to search, analyze, monitor, and visualize machine-generated data.
+
+In a SOC, it can support:
 
 ```text
-Collect telemetry
-→ Forward or upload data
-→ Store in indexes
-→ Search with SPL
-→ Pivot on fields
-→ Narrow by time
-→ Build reports
-→ Create dashboards
-→ Monitor platform health
-→ Manage access
+Log Collection
+      ↓
+Indexing
+      ↓
+Search / SPL
+      ↓
+Correlation
+      ↓
+Reports / Alerts
+      ↓
+Dashboards
+      ↓
+Incident Investigation
 ```
 
-The objective is not to reproduce a vendor tutorial. It is to show how Splunk is used to turn raw Windows and web telemetry into investigation-ready evidence.
-
----
-
-# 1. Splunk in a SOC
-
-Splunk is commonly used to centralize, search, correlate, and visualize security telemetry.
-
-A practical SOC workflow is:
+## Common Ports
 
 ```text
-Endpoint / Server / Security Tool
-        ↓
-Universal Forwarder / Upload / Input
-        ↓
-Splunk Index
-        ↓
-Search & Reporting
-        ↓
-SPL filtering / aggregation
-        ↓
-Report / Alert / Dashboard
-        ↓
-Analyst investigation
+9997  → forwarder data to Splunk
+8000  → Splunk Web / Search & Reporting
+8089  → splunkd management communication
 ```
 
-For an analyst, the core skill is not navigating menus. It is knowing how to find the right data, constrain the search, interpret the fields, and pivot into related activity.
+## Installation Notes
 
----
-
-# 2. Data Onboarding
-
-## 2.1 Add Data
-
-Splunk data onboarding begins from **Settings → Add Data**.
-
-![Add Data](assets/01-add-data.png)
-
-This is the starting point for onboarding:
-
-- local files
-- monitored files/directories
-- operating-system logs
-- network inputs
-- forwarder data
-
----
-
-## 2.2 Forwarding Data
-
-The lab uses the **Forward** method to receive data from a Splunk Universal Forwarder.
-
-![Forward method](assets/02-forward-method.png)
-
-Conceptually:
+Windows service display name:
 
 ```text
-Windows Endpoint
+Splunkd Service
+```
+
+Linux status command:
+
+```bash
+/opt/splunk/bin/splunk status
+```
+
+---
+
+# 2. Splunk Universal Forwarder
+
+The Universal Forwarder is a lightweight Splunk component used to send telemetry from endpoints to Splunk.
+
+For this lab:
+
+```text
+Windows 10 endpoint
       ↓
 Universal Forwarder
       ↓
 TCP 9997
       ↓
-Splunk
+Splunk Enterprise
+      ↓
+winlog_clients index
 ```
 
----
-
-## 2.3 Selecting the Forwarder
-
-The forwarder host is selected and assigned to a server class.
-
-![Select forwarder](assets/03-select-forwarder.png)
-
-This links a managed forwarder to the data-input configuration that will be applied to it.
+The goal is to collect Windows Event Logs centrally.
 
 ---
 
-## 2.4 Selecting Windows Event Logs
+# 3. Add Windows Event Logs Using a Forwarder
 
-The lab selects Windows Event Log channels for collection.
+## Step 1 — Open Add Data
 
-![Select Windows Event Logs](assets/04-select-windows-event-logs.png)
+Navigate to:
 
-Relevant channels can include:
+```text
+Settings → Add Data
+```
+
+![Add Data](assets/lab15/5.1.png)
+
+---
+
+## Step 2 — Select Forward
+
+Choose **Forward**.
+
+![Forward Option](assets/lab15/5.2.png)
+
+This tells Splunk that the data source will come from a Splunk forwarder rather than from a local upload.
+
+---
+
+## Step 3 — Select the Forwarder Host
+
+Move the Windows host into **Selected Hosts**, assign a server class, and continue.
+
+![Select Forwarder](assets/lab15/5.3.png)
+
+### Analyst Concept
+
+A server class allows Splunk to apply input configurations to one or more managed forwarders.
+
+---
+
+## Step 4 — Select Windows Event Log Sources
+
+Choose **Local Event Logs** and select the Windows log channels to collect.
+
+![Select Windows Event Logs](assets/lab15/5.4.png)
+
+Typical channels include:
 
 ```text
 Application
+ForwardedEvents
 Security
 Setup
 System
-ForwardedEvents
 ```
 
-For SOC work, the **Security** channel is particularly valuable for authentication and account activity.
+For SOC investigations, the **Security** log is particularly important for authentication and account activity.
 
 ---
 
-# 3. Indexes
+## Step 5 — Choose or Create an Index
 
-## 3.1 Viewing Indexes
-
-Indexes are managed under **Settings → Indexes**.
-
-![Open Indexes](assets/05-open-indexes.png)
-
-An index is the logical repository where Splunk stores ingested events.
-
----
-
-## 3.2 Dedicated Windows Index
-
-The lab uses:
+The lab creates:
 
 ```text
-winlog_clients
+WinLog_clients
 ```
 
-for Windows event data.
-
-![winlog_clients index](assets/06-index-winlog-clients.png)
-
-### Analyst Principle
-
-Always identify:
+After configuration, navigate to:
 
 ```text
-index
-source
-sourcetype
-host
-time range
+Settings → Indexes
 ```
 
-before running broad searches.
+![Open Indexes](assets/lab15/5.5.png)
 
-A focused search is faster and easier to interpret.
+Search for the new index.
 
----
+![winlog_clients Index](assets/lab15/5.6.png)
 
-# 4. Forwarding and Receiving
+### Why Indexes Matter
 
-## 4.1 Receiving Port
+An index is a logical storage location for events.
 
-Splunk must be configured to receive forwarded data.
-
-![Configure receiving](assets/07-configure-receiving.png)
-
-The training uses:
-
-```text
-TCP 9997
-```
-
-as the receiving port.
-
----
-
-## 4.2 Validating Ingestion
-
-After forwarding is configured, the index event count increases.
-
-![Index events arriving](assets/08-index-events-arriving.png)
-
-This confirms that telemetry is reaching Splunk.
-
-A useful troubleshooting sequence is:
-
-```text
-Forwarder installed?
-→ Forwarder running?
-→ Correct source selected?
-→ Port 9997 reachable?
-→ Splunk receiving?
-→ Correct index?
-→ Events visible in Search?
-```
-
----
-
-# 5. Searching an Index
-
-A basic search can target the index directly:
+During investigation, a focused search such as:
 
 ```spl
 index="winlog_clients"
 ```
 
-![Search winlog index](assets/09-search-winlog-index.png)
-
-This returns the Windows events stored in that index.
-
-The search interface exposes:
-
-- raw events
-- extracted fields
-- source
-- sourcetype
-- host
-- event counts
-- timeline
+is preferable to searching every index.
 
 ---
 
-# 6. Manual File Upload
+# 4. Configure the Receiving Port
 
-Splunk can also ingest files directly.
+If the forwarder is configured but no events arrive, Splunk must be listening for forwarded data.
 
-## 6.1 Select Upload
+Navigate to:
 
-![Upload method](assets/10-upload-method.png)
+```text
+Settings → Forwarding and Receiving
+```
+
+Then configure a receiving port.
+
+![Configure Receiving](assets/lab15/5.7.png)
+
+Use:
+
+```text
+9997
+```
+
+After a short delay, event counts should begin increasing.
+
+![Events Received](assets/lab15/5.8.png)
+
+Run a search to validate ingestion.
+
+![Search Forwarded Events](assets/lab15/5.9.png)
+
+### Forwarder Troubleshooting Checklist
+
+- [ ] Universal Forwarder installed
+- [ ] Forwarder service running
+- [ ] Correct host selected
+- [ ] Correct Windows Event Logs selected
+- [ ] Splunk listening on TCP 9997
+- [ ] Network/firewall permits TCP 9997
+- [ ] Correct index configured
+- [ ] Search time range includes the data
+- [ ] Event count is increasing
+
+---
+
+# 5. Add Data by Manual Upload
+
+Splunk can also ingest standalone files.
+
+## Step 1 — Open Add Data
+
+Navigate again to:
+
+```text
+Settings → Add Data
+```
+
+![Add Data for Upload](assets/lab15/5.10.png)
+
+---
+
+## Step 2 — Select Upload
+
+Choose **Upload**.
+
+![Upload Option](assets/lab15/5.11.png)
 
 This is useful for:
 
+- CSV files
 - exported incident logs
-- training datasets
-- CSVs
 - archived evidence
-- one-off analysis
+- training datasets
+- one-off log analysis
 
 ---
 
-## 6.2 Select the File
+## Step 3 — Select the File
 
-![Upload file](assets/11-upload-file.png)
+Choose the file and continue.
 
-The analyst reviews:
+![Upload File](assets/lab15/5.12.png)
 
-- source
-- sourcetype
-- host
-- event preview
-- destination index
+Splunk then previews how the data will be parsed.
 
-before ingestion.
-
----
-
-## 6.3 Validate Uploaded Data
-
-The uploaded CSV is searchable after ingestion.
-
-![Uploaded CSV results](assets/12-uploaded-csv-results.png)
-
-The example shows:
+Review:
 
 ```text
-source = import_logs.csv
-sourcetype = csv
+source
+sourcetype
+host
+timestamp parsing
+field extraction
+destination index
 ```
 
-### Analyst Lesson
+---
 
-Always confirm that Splunk interpreted the source correctly before trusting field extractions.
+## Step 4 — Search the Uploaded Logs
+
+After ingestion, search the uploaded source.
+
+![Search Uploaded Logs](assets/lab15/5.13.png)
+
+The example shows a CSV source such as:
+
+```text
+source="import_logs.csv"
+sourcetype="csv"
+```
+
+### Analyst Principle
+
+Always validate parsing before relying on extracted fields.
+
+A malformed sourcetype or timestamp parser can produce misleading investigation results.
+
+---
+
+# 6. Searching in Splunk
+
+## Search Syntax Basics
+
+Important rules from the training:
+
+- field names are case-sensitive
+- field values are generally case-insensitive
+- `*` is a wildcard
+- logical operators include `AND`, `OR`, and `NOT`
+
+A basic search:
+
+```spl
+index="winlog_clients"
+```
 
 ---
 
 # 7. Time Range Selection
 
-Time is one of the most important dimensions in incident investigation.
+Splunk provides several methods for defining the time window.
 
-![Date range picker](assets/13-date-range-picker.png)
+![Time Range Selection](assets/lab15/6.1.png)
 
-Splunk supports:
+## Presets
 
-```text
-Presets
-Relative
-Real-time
-Date Range
-Date & Time Range
-Advanced
-```
-
-A good SOC workflow starts with a narrow window around the alert and expands only if needed.
-
-Example:
+Examples:
 
 ```text
-Alert time - 10 minutes
-→ Alert time + 30 minutes
+Today
+Last 15 minutes
+Last 24 hours
+Last 7 days
+Last 30 days
+All time
 ```
 
-instead of searching `All time`.
+![Time Presets](assets/lab15/6.2.png)
 
 ---
 
-# 8. Search Fundamentals
+## Relative Time
 
-A basic search example:
+Relative searches define time compared with now.
 
-```spl
-index="winlog_clients"
-```
+![Relative Time](assets/lab15/6.3.png)
 
-![Search query](assets/14-search-query.png)
-
-Splunk search fields and operators demonstrated in the training include:
+Examples:
 
 ```text
-AND
-OR
-NOT
-*
-```
-
-General rules:
-
-- field names are case-sensitive
-- field values are usually matched case-insensitively
-- use wildcards carefully
-- keep searches scoped whenever possible
-
----
-
-# 9. Field Discovery
-
-The left-side field panel is one of the most useful analyst features.
-
-![Field sidebar](assets/15-field-sidebar.png)
-
-It divides fields into:
-
-```text
-Selected Fields
-Interesting Fields
-```
-
-This helps identify pivots such as:
-
-- `ComputerName`
-- `EventCode`
-- account fields
-- source IP
-- source
-- sourcetype
-- hostname
-
-### Analyst Principle
-
-Do not assume the field name from memory.
-
-Inspect what the dataset actually exposes.
-
----
-
-# 10. Pivoting on Field Values
-
-Selecting a field such as `ComputerName` shows value distribution.
-
-![ComputerName values](assets/16-computername-values.png)
-
-This is useful for quickly answering:
-
-```text
-Which hosts generated the events?
-Which host dominates?
-Are there rare hosts?
-```
-
-This same technique can be used for:
-
-- username
-- source IP
-- destination
-- EventCode
-- URI
-- process
-- action
-
----
-
-# 11. Web-Log Field Pivoting
-
-A web dataset can be narrowed by URI:
-
-```spl
-uri_path="/productscreen.html"
-```
-
-and then pivoted on fields such as:
-
-```text
-clientip
-```
-
-![URI and client IP pivot](assets/17-uri-clientip-pivot.png)
-
-This allows the analyst to identify which client IPs interacted with a specific application path.
-
----
-
-# 12. Aggregation with `stats`
-
-The training demonstrates aggregation using:
-
-```spl
-clientip="128.241.220.82"
-| stats count by uri_path
-| sort -count
-```
-
-![Stats URI count](assets/18-stats-uri-count.png)
-
-This query answers:
-
-> Which URI paths did this client access most frequently?
-
-This is an important SOC pattern:
-
-```text
-Filter entity
-→ Group by behavior
-→ Count
-→ Sort
-→ Investigate outliers
+Minutes Ago
+Hours Ago
+Days Ago
+Weeks Ago
+Months Ago
 ```
 
 ---
 
-# 13. Windows Authentication Investigation
+## Date Range
 
-The lab searches failed Windows logons using Event ID:
+A fixed date range can be selected.
+
+![Date Range](assets/lab15/6.4.png)
+
+### SOC Tip
+
+Start narrow around the alert:
 
 ```text
-4625
+10 minutes before
+→ alert time
+→ 30 minutes after
 ```
 
-Example:
-
-```spl
-source="WinEventLog:*"
-index="winlog_clients"
-EventCode=4625
-AND Nom_du_compte=Admin*
-```
-
-![Failed admin logons](assets/19-failed-admin-logons.png)
-
-The field name in this dataset is localized (`Nom_du_compte`), which reinforces an important point:
-
-> Field names vary between datasets, parsers, operating-system language, and add-ons.
-
-Never blindly assume the field will be named `AccountName`.
+Then widen only when necessary.
 
 ---
 
-# 14. Search Modes
+# 8. Timeline Analysis
+
+Splunk automatically visualizes event density over time.
+
+![Timeline](assets/lab15/6.5.png)
+
+Use the timeline to identify:
+
+- spikes
+- bursts
+- suspicious clusters
+- quiet periods
+- investigation windows
+
+A spike does not prove maliciousness; it tells the analyst where to investigate.
+
+---
+
+# 9. Search Modes
 
 Splunk provides:
 
@@ -476,49 +408,190 @@ Smart
 Verbose
 ```
 
-## Fast
+![Search Mode](assets/lab15/6.6.png)
 
+The available modes are shown here:
+
+![Search Mode Options](assets/lab15/6.7.png)
+
+## Fast Mode
 Prioritizes speed and performs less field discovery.
 
-## Smart
+## Smart Mode
+Balances performance and field extraction.
 
-Balances speed and field extraction.
+## Verbose Mode
+Returns more complete event and field information.
 
-## Verbose
-
-Returns the most complete field/event detail.
-
-For typical analyst investigation, **Smart Mode** is a useful default, while Verbose is valuable when deeper event detail is required.
+For most analyst work, **Smart Mode** is a practical default.
 
 ---
 
-# 15. Reports
+# 10. Search Bar and Field Discovery
 
-A search can be saved as a reusable report.
+The search bar is where SPL queries are entered.
 
-## 15.1 Save As Report
+![Search Bar](assets/lab15/6.8.png)
 
-![Save as report](assets/20-save-as-report.png)
+After the search runs, Splunk displays available fields on the left.
 
-The analyst selects:
+![Field Discovery](assets/lab15/6.9.png)
+
+### Analyst Workflow
+
+```text
+Run broad search
+      ↓
+Inspect available fields
+      ↓
+Choose a useful pivot
+      ↓
+Filter on host/user/IP/event
+```
+
+---
+
+# 11. Pivoting on Field Values
+
+Selecting a field displays its values and frequency.
+
+In this example, `ComputerName` has two observed values.
+
+![ComputerName Values](assets/lab15/6.10.png)
+
+This is useful for determining:
+
+```text
+Which hosts generated the events?
+Which value dominates?
+Which value is rare?
+```
+
+---
+
+# 12. Web Log Investigation with Fields
+
+A web request can be filtered by URI path:
+
+```spl
+uri_path="/productscreen.html"
+```
+
+Then the analyst can inspect the `clientip` field to identify distinct source addresses.
+
+![Client IP Pivot](assets/lab15/6.11.png)
+
+### Investigation Pattern
+
+```text
+Interesting URI
+      ↓
+Identify source IPs
+      ↓
+Choose suspicious client
+      ↓
+Aggregate requested paths
+```
+
+---
+
+# 13. Aggregation with `stats`
+
+The lab then analyzes one client IP:
+
+```spl
+clientip="128.241.220.82"
+| stats count by uri_path
+| sort -count
+```
+
+![URI Request Counts](assets/lab15/6.12.png)
+
+This produces request frequency per path.
+
+### SOC Value
+
+This is a reusable investigation pattern:
+
+```text
+Filter entity
+→ group behavior
+→ count
+→ sort
+→ investigate highest/rarest activity
+```
+
+---
+
+# 14. Windows Failed-Logon Investigation
+
+The training creates a report around Windows failed logons using:
+
+```text
+EventCode 4625
+```
+
+Example search:
+
+```spl
+source="WinEventLog:*"
+index="winlog_clients"
+EventCode=4625
+AND Nom_du_compte=Admin
+```
+
+Depending on the parser or OS language, the account field might instead be:
+
+```text
+accountname
+```
+
+## Step 1 — Run the Search
+
+![Failed Admin Logon Search](assets/lab15/7.1.png)
+
+### Analyst Lesson
+
+Do not assume field names.
+
+Inspect the dataset because:
+
+```text
+Nom_du_compte
+AccountName
+TargetUserName
+user
+```
+
+may all represent related concepts in different data sources.
+
+---
+
+# 15. Create a Report
+
+## Step 2 — Save As Report
+
+Click:
 
 ```text
 Save As → Report
 ```
 
+![Save As Report](assets/lab15/7.2.png)
+
 ---
 
-## 15.2 Report Metadata
+## Step 3 — Add Report Metadata
 
-The report is given:
+Add:
 
 - title
 - description
 - time-range behavior
 
-![Report form](assets/21-report-form.png)
+![Report Details](assets/lab15/7.3.png)
 
-Example title:
+A clear SOC report title might be:
 
 ```text
 WINDOWS - Connections failed for admin account
@@ -526,163 +599,209 @@ WINDOWS - Connections failed for admin account
 
 ---
 
-## 15.3 Saved Report Results
+## Step 4 — View the Report
 
-![Report results](assets/22-report-results.png)
+After saving, open the report.
 
-This creates a reusable investigation view for repeated failed-admin-login analysis.
+![View Report](assets/lab15/7.4.png)
 
----
-
-## 15.4 Reports Tab
-
-![Reports tab](assets/23-reports-tab.png)
-
-Reports are accessible from the **Reports** area.
+Reports are reusable saved searches that reduce repeated analyst work.
 
 ---
 
-## 15.5 Reports List
+# 16. Manage Existing Reports
 
-![Reports list](assets/24-reports-list.png)
+Open the **Reports** tab.
 
-The saved Windows failed-login report appears alongside other reports.
+![Reports Section](assets/lab15/7.5.png)
+
+The list displays available reports.
+
+![Reports List](assets/lab15/7.6.png)
+
+Select the report to review its details.
+
+![Select Report](assets/lab15/7.7.png)
+
+The **Edit** menu supports actions such as:
+
+- edit description
+- edit permissions
+- edit schedule
+- edit acceleration
+- clone
+- embed
+- delete
+
+![Edit Report](assets/lab15/7.8.png)
+
+### SOC Use Cases for Reports
+
+- failed login monitoring
+- brute-force review
+- suspicious IP tracking
+- malware events
+- unauthorized-access checks
+- routine audit searches
 
 ---
 
-## 15.6 Editing a Report
+# 17. Alerts
 
-![Report edit menu](assets/25-report-edit-menu.png)
+Splunk alerts are saved searches that trigger when specified conditions are met.
 
-Reports can be modified for:
-
-- description
-- permissions
-- scheduling
-- acceleration
-- cloning
-- embedding
-- deletion
-
-### SOC Value
-
-Reports are useful for repeatable analyst workflows but should not replace raw-event inspection when investigating a live incident.
-
----
-
-# 16. Dashboards
-
-A saved search or report can be added to a dashboard.
-
-![Save panel to dashboard](assets/33-save-panel-dashboard.png)
-
-Example:
+They can be:
 
 ```text
-Dashboard: SOC L1
-Panel: Admin Connection Failed
+Scheduled
+Real-time
 ```
 
-Dashboards are useful for:
+A conceptual detection is:
 
-- situational awareness
-- authentication trends
-- alert counts
+```text
+Search
++
+Condition
++
+Time Window
++
+Trigger
+=
+Alert
+```
+
+### Operational Caution
+
+Real-time alerts can consume significant platform resources.
+
+Use real-time searches where low latency is truly necessary.
+
+---
+
+# 18. Dashboards
+
+Dashboards provide reusable visual views of search results.
+
+![Dashboard](assets/lab15/9.1.png)
+
+A SOC dashboard might include:
+
 - failed logins
+- alert volume
+- top source IPs
 - malware activity
-- top IPs
-- SOC metrics
+- suspicious web traffic
+- critical incidents
 
-But dashboards are summaries. Analysts should pivot into raw events when deeper validation is needed.
+### Analyst Principle
+
+Dashboards provide awareness.
+
+They do **not** replace raw-event review during an investigation.
 
 ---
 
-# 17. Platform Health
+# 19. Splunk Health Status
 
-Splunk provides health reporting.
+Splunk provides a health report for platform components.
 
-![Health Status](assets/34-health-status.png)
+![Splunk Health](assets/lab15/10.1.png)
 
-Health indicators may cover components such as:
-
-- file monitor input
-- index processor
-- search scheduler
-- workload management
-
-This matters because:
+The interface can show status for components such as:
 
 ```text
-missing data
-≠ automatically no activity
+File Monitor Input
+Index Processor
+Search Scheduler
+Workload Management
 ```
 
-An ingestion or indexing issue may be the cause.
+### Why SOC Analysts Should Care
 
----
-
-# 18. Roles and Access Control
-
-Splunk supports role-based access control.
-
-## 18.1 Opening Roles
-
-![Open roles](assets/35-open-roles.png)
-
----
-
-## 18.2 Role List
-
-![Roles list](assets/36-roles-list.png)
-
-Roles may include:
+If expected telemetry is missing:
 
 ```text
-admin
-power
-user
-system roles
-custom roles
+No events in Splunk
 ```
 
-Permissions affect:
+does not always mean:
 
-- available indexes
+```text
+No activity occurred
+```
+
+The ingestion or indexing pipeline may be unhealthy.
+
+---
+
+# 20. Role Management
+
+Navigate to:
+
+```text
+Settings → Roles
+```
+
+![Roles Menu](assets/lab15/11.1.png)
+
+Splunk includes built-in roles and allows custom roles.
+
+![Roles List](assets/lab15/11.2.png)
+
+Roles can control:
+
+- platform capabilities
 - search permissions
-- administrative capabilities
-- default apps
+- index visibility
+- app access
+- administrative functions
 
 ### Security Principle
 
-Use least privilege for analyst and administrative accounts.
+Use least privilege.
+
+SOC analysts should have the data and search access they need without unnecessary administrative permissions.
 
 ---
 
-# 19. Users
+# 21. User Management
 
-User management is available from **Settings → Users**.
+Navigate to:
 
-![Open users](assets/37-open-users.png)
+```text
+Settings → Users
+```
 
-Analysts should understand that SIEM user access is itself security-sensitive.
+![Users Menu](assets/lab15/11.3.png)
 
----
+The source lab begins with the default administrative account.
 
-# 20. Password Management
+A practical hardening approach is to create named administrator accounts and reserve generic `admin` use for exceptional cases.
 
-Splunk exposes password-management settings.
-
-![Password management](assets/38-open-password-management.png)
-
-Administrative account security should be treated as part of SIEM hardening.
-
-The training recommends creating a dedicated administrator account rather than using the default `admin` account for routine activity.
+This improves accountability and auditability.
 
 ---
 
-# 21. Useful SPL Patterns
+# 22. Password Management
 
-## Search an Index
+Password policy is available under:
+
+```text
+Settings → Password Management
+```
+
+![Password Management](assets/lab15/11.4.png)
+
+SIEM administrative accounts are high-value targets.
+
+Password policy, account separation, and least privilege are part of SIEM security—not just platform administration.
+
+---
+
+# 23. Useful SPL Patterns
+
+## Search a Windows Index
 
 ```spl
 index="winlog_clients"
@@ -700,24 +819,17 @@ index="winlog_clients" EventCode=4625
 source="WinEventLog:*"
 index="winlog_clients"
 EventCode=4625
-AND Nom_du_compte=Admin*
+AND Nom_du_compte=Admin
 ```
 
-## Multiple Event IDs
+## Search Two Authentication Outcomes
 
 ```spl
 index="winlog_clients"
 (EventCode=4624 OR EventCode=4625)
 ```
 
-## Exclude a Value
-
-```spl
-index="winlog_clients"
-NOT User=SYSTEM
-```
-
-## Count by Field
+## Count Events by Host
 
 ```spl
 index="winlog_clients"
@@ -725,7 +837,7 @@ index="winlog_clients"
 | sort -count
 ```
 
-## Web Requests by URI
+## Count Web Requests by Path
 
 ```spl
 clientip="128.241.220.82"
@@ -735,140 +847,86 @@ clientip="128.241.220.82"
 
 ---
 
-# 22. Analyst Search Method
-
-A strong Splunk investigation usually narrows progressively:
+# 24. SOC Investigation Workflow in Splunk
 
 ```text
-1. Set time range
-2. Identify index
-3. Run broad search
-4. Inspect fields
-5. Pivot on host/user/IP
-6. Count/group behavior
-7. Search before/after activity
-8. Correlate related event types
-9. Review raw events
-10. Document evidence
-```
-
-This is more reliable than attempting to write one complex SPL query immediately.
-
----
-
-# 23. Authentication Investigation Example
-
-A practical investigation might begin:
-
-```spl
-index="winlog_clients" EventCode=4625
-```
-
-Then pivot:
-
-```text
-Which account?
-Which host?
-Which source address?
-How many failures?
-What time window?
-Was there a later 4624 success?
-```
-
-A useful correlation concept:
-
-```text
-Repeated 4625
-+
-same account/source
-+
-short time window
-+
-later 4624
-→ possible password attack followed by success
+Alert received
+      ↓
+Choose time range
+      ↓
+Identify index/source/sourcetype
+      ↓
+Run broad search
+      ↓
+Inspect fields
+      ↓
+Pivot on host/user/IP
+      ↓
+Aggregate/count behavior
+      ↓
+Search before and after
+      ↓
+Correlate related events
+      ↓
+Review raw events
+      ↓
+Build timeline
+      ↓
+Determine scope and verdict
 ```
 
 ---
 
-# 24. Detection Engineering Connection
+# 25. Authentication Correlation Example
 
-Splunk searches can become reports or alerts.
-
-Conceptually:
+A useful investigation pattern is:
 
 ```text
-SPL search
-+
-threshold
-+
-time window
-+
-schedule/real-time execution
-→ detection
+Repeated EventCode 4625
+      ↓
+Same account / source
+      ↓
+Short time window
+      ↓
+Check EventCode 4624
 ```
 
-Example brute-force concept:
+If failures are followed by a successful login, the analyst should determine whether the sequence is:
 
-```text
-many EventCode=4625
-by same user/source
-within short interval
-```
-
-A mature rule should also account for:
-
-- service accounts
-- scanners
+- normal user error
 - stale credentials
-- expected administrative activity
-- false-positive tuning
+- service-account behavior
+- password spraying
+- brute-force activity
+- credential compromise
 
 ---
 
-# 25. Reports vs Alerts vs Dashboards
+# 26. Reports vs Alerts vs Dashboards
 
-| Splunk Feature | Main Purpose |
+| Feature | Purpose |
 |---|---|
 | Search | Ad hoc investigation |
 | Report | Reusable saved search |
-| Alert | Trigger when detection condition is met |
-| Dashboard | Visual summary of recurring data |
-
-This distinction is useful both operationally and in interviews.
-
----
-
-# 26. Forwarder Troubleshooting Checklist
-
-If expected Windows data is missing:
-
-- [ ] Universal Forwarder installed
-- [ ] Forwarder service running
-- [ ] Correct host configured
-- [ ] Correct event logs selected
-- [ ] Splunk receiver listening on 9997
-- [ ] Network/firewall permits 9997
-- [ ] Correct index configured
-- [ ] Search time window correct
-- [ ] Event count increasing
-- [ ] Splunk health normal
+| Alert | Trigger when conditions are met |
+| Dashboard | Visualize recurring information |
 
 ---
 
 # 27. Search Validation Checklist
 
-Before trusting a query:
+Before trusting a result:
 
 - [ ] correct index
 - [ ] correct source/sourcetype
 - [ ] correct time range
-- [ ] correct field names
-- [ ] raw events reviewed
-- [ ] field values validated
-- [ ] wildcards not overly broad
+- [ ] correct field name
+- [ ] correct field value
+- [ ] raw event reviewed
+- [ ] wildcard scope appropriate
 - [ ] related events checked
-- [ ] missing telemetry considered
 - [ ] timezone understood
+- [ ] ingestion health considered
 
 ---
 
@@ -876,16 +934,16 @@ Before trusting a query:
 
 Avoid:
 
-- using `All time` by default
-- forgetting the relevant index
+- searching `All time` unnecessarily
+- searching the wrong index
 - assuming field names
-- relying only on dashboards
+- relying only on dashboard panels
 - ignoring raw events
 - using broad wildcards too early
-- treating one field value as complete context
-- creating unnecessary real-time searches
-- assuming no Splunk results means no activity
-- forgetting to validate forwarder/ingestion health
+- treating missing telemetry as proof of no activity
+- creating unnecessary real-time alerts
+- failing to validate forwarding/receiving
+- ignoring localized field names
 
 ---
 
@@ -893,45 +951,35 @@ Avoid:
 
 This lab demonstrates practical exposure to:
 
-- Splunk data onboarding
-- Universal Forwarder
-- Windows Event Log collection
-- receiving on TCP 9997
-- index management
-- manual CSV ingestion
-- SPL filtering
-- time-range control
-- field discovery
-- field-value pivoting
-- `stats`
-- authentication-event analysis
-- reports
-- dashboards
-- Splunk health
-- roles
-- users
-- password management
+```text
+Splunk Universal Forwarder
+Windows Event Log ingestion
+TCP 9997 receiving
+index management
+manual CSV upload
+SPL searching
+time-range selection
+search modes
+field discovery
+field-value pivots
+stats aggregation
+Windows EventCode 4625
+reports
+alerts
+dashboards
+health monitoring
+roles
+users
+password management
+```
 
 ---
 
-# 30. Interview-Level Summary
+# 30. Interview-Ready Summary
 
-If asked:
+If asked **"How would you use Splunk during a SOC investigation?"**, a strong answer is:
 
-> How do you use Splunk during a SOC investigation?
-
-A strong answer is:
-
-```text
-I first identify the relevant index, source or sourcetype, host, and
-time window. I search around the alert and inspect both the raw event
-and extracted fields. I then pivot on the user, host, IP, event ID, or
-other indicators, aggregate events where useful, and look before and
-after the triggering activity to build a timeline. I use reports and
-dashboards for recurring visibility, but validate important conclusions
-against the underlying events and consider ingestion issues if expected
-telemetry is missing.
-```
+> I would first identify the relevant index, source or sourcetype, host, and time window. I would search around the alert, inspect both the raw event and extracted fields, then pivot on the user, host, IP, event ID, or other indicators. I would aggregate or count events where useful, examine activity before and after the trigger to build a timeline, and correlate related telemetry. Reports and dashboards can accelerate recurring workflows, but I would validate important conclusions against the underlying events and consider ingestion issues if expected data is missing.
 
 ---
 
@@ -952,12 +1000,10 @@ Collect
 → Visualize
 ```
 
-The key skill is not remembering every menu option.
-
-It is being able to **turn large amounts of telemetry into a focused, defensible incident narrative**.
+The core skill is turning large volumes of telemetry into a focused and defensible incident narrative.
 
 ---
 
 # Training Context
 
-This knowledge base was created from authorized Splunk training material and lab screenshots. It is intended as a practical SOC analyst reference rather than a quiz-answer or course walkthrough.
+This knowledge base is based on authorized Splunk training material and screenshots. It is intended as a practical SOC analyst reference rather than a quiz-answer walkthrough.
