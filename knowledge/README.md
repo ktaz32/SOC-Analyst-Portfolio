@@ -44,7 +44,7 @@ Alert
  + Network activity
  + Sandbox behavior
  + Threat intelligence
- + User / host context
+ + User / host contexts
 ```
 
 ## Evidence vs Inference
