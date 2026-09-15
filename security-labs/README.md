@@ -1,30 +1,60 @@
 # Security Labs
 
-This directory documents hands-on cybersecurity labs and security infrastructure projects.
+This directory is reserved for hands-on security infrastructure and telemetry labs that complement the investigation portfolio.
 
-The purpose of these projects is to develop practical experience with the systems and telemetry used in Security Operations Centers.
+The objective is to build and document the systems a SOC analyst works with, not only investigate pre-generated alerts.
 
-Planned and ongoing lab areas may include:
+---
 
-* SOC home lab
-* SIEM deployment
-* Splunk
-* Windows logging
-* Sysmon
-* Endpoint monitoring
-* Network monitoring
-* Malware-analysis environments
-* Detection testing
+# Current Lab-Derived Skills Demonstrated Elsewhere in the Portfolio
 
-Each lab project will document:
+Although standalone lab folders are still being developed, the current repository already documents practical lab work involving:
 
-* Objective
-* Architecture
-* Tools used
-* Configuration
-* Data sources
-* Testing methodology
-* Security use cases
-* Lessons learned
+- Splunk data ingestion and Windows Event Logs
+- Splunk indexes, forwarders, searches, reports, dashboards, and roles
+- Windows Event Viewer and Security logs
+- Event IDs 4624 and 4625
+- malware-analysis environments
+- Process Hacker / Procmon / Regshot
+- Wireshark and PCAP analysis
+- Fiddler / HTTP traffic analysis
+- VirusTotal / ANY.RUN enrichment
+- endpoint containment workflows
+- network, firewall, proxy, and web-log analysis
+
+Relevant references are currently documented under [`knowledge/`](../knowledge/) and case studies under [`Investigations/`](../Investigations/).
+
+---
+
+# Planned Standalone Lab Areas
+
+- SOC home lab
+- Splunk deployment and detection lab
+- Windows logging
+- Sysmon
+- PowerShell logging
+- Active Directory telemetry
+- endpoint monitoring
+- network monitoring
+- malware-analysis environment
+- detection testing
+- threat-hunting exercises
+
+---
+
+# Documentation Standard
+
+Each future standalone lab should document:
+
+1. Objective
+2. Architecture
+3. Tools used
+4. Configuration
+5. Data sources
+6. Validation / testing methodology
+7. Security use cases
+8. Screenshots / evidence
+9. Detection opportunities
+10. Lessons learned
 
 All labs are performed in authorized or personally controlled environments.
