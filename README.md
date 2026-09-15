@@ -1,21 +1,22 @@
 # SOC Analyst Portfolio
 
-I’m Khaled Taseen, a Computer Science student at Simon Fraser University focused on **Security Operations, Blue Team security, detection engineering, cloud security, malware analysis, and incident response**.
+I’m Khaled Taseen, a Computer Science student at Simon Fraser University focused on **Security Operations, Blue Team security, detection engineering, cloud security, malware analysis, DFIR, threat intelligence, and incident response**.
 
-This repository documents hands-on cybersecurity work across SOC investigations, phishing and email security, web attacks, malware analysis, network/PCAP analysis, DFIR, SIEM/log correlation, endpoint response, threat intelligence, MITRE ATT&CK mapping, and detection improvement.
+This repository documents hands-on cybersecurity work across SOC alert investigations, phishing and email security, web attacks, malware and ransomware, threat-intelligence triage, network/PCAP analysis, DFIR, SIEM/log correlation, Windows authentication analysis, endpoint response, MITRE ATT&CK validation, and detection improvement.
 
 I have completed **CompTIA Security+** and continue to build practical analyst capability through authorized labs, structured training, and independent security projects.
 
 The goal of this portfolio is not to reproduce training-platform walkthroughs or challenge answers. It is to demonstrate:
 
 - alert triage and investigation methodology
-- evidence collection and correlation
+- evidence collection and multi-source correlation
 - analyst reasoning and confidence assessment
 - true-positive vs false-positive decision making
 - IOC enrichment and artifact handling
 - static and dynamic malware analysis
-- network and endpoint analysis
-- MITRE ATT&CK mapping
+- network, endpoint, and Windows-event analysis
+- threat-intelligence validation
+- MITRE ATT&CK mapping based on evidence
 - containment and remediation decisions
 - detection engineering and tuning opportunities
 - clear technical reporting
@@ -26,17 +27,19 @@ The goal of this portfolio is not to reproduce training-platform walkthroughs or
 
 | Metric | Current Status |
 |---|---:|
-| SOC Alert Investigations | **17** |
+| SOC Alert Investigations | **19** |
 | Phishing / Email Cases | **5** |
 | Web Attack Cases | **6** |
-| Malware Alert Cases | **6** |
+| Malware / Ransomware SOC Cases | **7** |
+| Threat-Intelligence SOC Cases | **1** |
 | Dedicated Malware Analysis Cases | **3** |
 | Network / PCAP Cases | **1** |
 | DFIR Cases | **1** |
-| False-Positive SOC Cases | **4** |
-| Total Documented Investigation / Analysis Cases | **22** |
+| False-Positive SOC Cases | **5** |
+| Knowledge-Base References | **17** |
+| Total Documented Investigation / Analysis Cases | **24** |
 
-> Counts reflect the cases currently included in this repository.
+> Counts reflect the cases currently present in this repository.
 
 ---
 
@@ -52,9 +55,7 @@ These standalone repositories complement the investigation work in this portfoli
 
 ## Detection-as-Code Pipeline
 
-The **Detection-as-Code Pipeline** treats security detections as testable software.
-
-It includes:
+The **Detection-as-Code Pipeline** treats security detections as testable software and includes:
 
 - Sigma-based Windows detections
 - positive and negative behavioral fixtures
@@ -84,35 +85,11 @@ ATT&CK + tuning + playbook
 
 ## AWS Cloud Security Assessment
 
-The **AWS Cloud Security Assessment** documents hands-on security review and remediation across AWS services.
-
-Current areas include:
-
-- IAM over-permissioning
-- least-privilege remediation
-- S3 identity-policy scoping
-- S3 bucket-policy analysis
-- unintended resource-based access
-- EC2 security-group exposure
-- CloudTrail investigation and validation
-- before-and-after evidence
-- remediation verification
+The **AWS Cloud Security Assessment** documents hands-on security review and remediation across AWS services, including IAM, S3, EC2 Security Groups, CloudTrail, least privilege, resource-policy analysis, and remediation validation.
 
 ## NIST CSF 2.0 Gap Assessment
 
-The **NIST CSF 2.0 Gap Assessment** demonstrates governance, risk, and control-assessment skills.
-
-The project includes:
-
-- assessment across Govern, Identify, Protect, Detect, Respond, and Recover
-- evidence-based cybersecurity findings
-- maturity scoring
-- likelihood × impact risk analysis
-- formal risk register
-- remediation prioritization
-- validation criteria
-- executive-level reporting
-- maturity and risk visualizations
+The **NIST CSF 2.0 Gap Assessment** demonstrates governance, risk, and control-assessment skills across Govern, Identify, Protect, Detect, Respond, and Recover, with maturity scoring, a formal risk register, remediation prioritization, and executive reporting.
 
 Together, these projects demonstrate capability across **SOC operations, detection engineering, cloud security, and GRC/risk management**.
 
@@ -129,6 +106,8 @@ Selected cases that best demonstrate investigation depth and evidence correlatio
 | [SOC-011](./Investigations/web-attacks/SOC-011-successful-command-injection/) | Successful Command Injection / Host Compromise | Web / Endpoint | High | **True Positive — Successful** | Command execution, Linux telemetry, post-exploitation, escalation |
 | [SOC-015](./Investigations/malware-analysis/SOC-015-suspicious-xlsm-malware/) | Suspicious XLSM Malware with Outbound Infrastructure Contact | Malware | Medium | **True Positive** | Malicious document analysis, firewall correlation, IOC validation |
 | [SOC-017](./Investigations/malware-analysis/SOC-017-ransomware-detected-true-positive-v2/) | Ransomware Detected on MarkPRD | Ransomware | Critical | **True Positive** | Ransomware triage, sandbox behavior, recovery inhibition, containment |
+| [SOC-018](./Investigations/threat-intelligence/soc-018-threat-intel-url-tapscanner-false-positive/) | Threat-Intelligence URL Alert / TapScanner Redirect | Threat Intelligence | High | **False Positive** | Redirect analysis, reputation validation, shared-infrastructure reasoning |
+| [SOC-019](./Investigations/malware-analysis/soc-019-malicious-docm-download-attempt-blocked/) | Malicious Macro Document Download Attempt | Malware | Medium | **True Positive — Blocked** | Macro malware triage, hash validation, event-time correlation, C2 qualification |
 | [MAL-003](./Investigations/malware-analysis/MAL-003-law-exe-dynamic-malware-analysis/MAL-003-law-exe-dynamic-malware-analysis/) | Dynamic Analysis of `law.exe` | Malware Analysis | — | **Malicious** | Procmon, Process Hacker, Wireshark, SMTP, persistence analysis |
 | [PCAP-001](./Investigations/network/PCAP-001-http-basic-auth-analysis/) | HTTP Basic Authentication Exposure | Network / PCAP | — | **Security Finding** | Wireshark, stream reconstruction, credential exposure |
 | [DFIR-001](./Investigations/DFIR/DFIR-001-multi-stage-web-attack-investigation/) | Multi-Stage Web Attack Investigation | DFIR | High | **Successful Compromise** | Attack-chain reconstruction, brute force, code injection, persistence |
@@ -139,10 +118,8 @@ Selected cases that best demonstrate investigation depth and evidence correlatio
 
 # Investigation Methodology
 
-My investigations generally follow this workflow:
-
 ```text
-Alert / Evidence Source
+Alert / Artifact / Packet Capture / Log Set
         ↓
 Initial Triage
         ↓
@@ -169,21 +146,7 @@ Detection Improvement
 Case Closure
 ```
 
-I avoid relying on a single alert label, reputation score, or sandbox verdict.
-
-Where possible, findings are correlated across:
-
-- SIEM telemetry
-- email-security data
-- proxy and firewall logs
-- web-server logs
-- endpoint/EDR evidence
-- process trees
-- browser and terminal history
-- packet captures
-- malware sandbox behavior
-- threat intelligence
-- user and host context
+I avoid relying on a single alert label, reputation score, or sandbox verdict. Where possible, findings are correlated across SIEM telemetry, email-security data, proxy/firewall logs, web-server logs, endpoint/EDR evidence, process trees, browser/terminal history, packet captures, sandbox behavior, threat intelligence, Windows Security events, and user/host context.
 
 ---
 
@@ -192,26 +155,15 @@ Where possible, findings are correlated across:
 Each report separates:
 
 ## Direct Evidence
-
 What the available logs, artifacts, endpoint data, or sandbox results explicitly show.
 
 ## Analyst Inference
-
 What can reasonably be concluded from those observations.
 
 ## Not Established
-
 What cannot be proven with the available telemetry.
 
-This prevents unsupported claims about:
-
-- successful exploitation
-- persistence
-- credential compromise
-- lateral movement
-- command and control
-- exfiltration
-- incident scope
+This prevents unsupported claims about successful exploitation, execution, persistence, credential compromise, lateral movement, command and control, exfiltration, or incident scope.
 
 ---
 
@@ -221,67 +173,47 @@ This prevents unsupported claims about:
 
 Location: [`Investigations/phishing/`](./Investigations/phishing/)
 
-Current cases:
-
 ```text
 SOC-001 through SOC-005
 ```
 
-Coverage includes malicious URLs, attachments, credential phishing, sender/header analysis, email-delivery validation, Office-document exploitation, false-positive analysis, and endpoint response.
+Coverage includes malicious URLs, malicious attachments, email false positives, CVE-2017-11882 exploitation, credential phishing, sender/header validation, mail-flow analysis, and endpoint response.
 
 ## Web Attack Analysis
 
 Location: [`Investigations/web-attacks/`](./Investigations/web-attacks/)
 
-Current cases:
-
 ```text
 SOC-006 through SOC-011
 ```
 
-Coverage includes LFI/directory traversal, SQL injection, IDOR, XSS, command injection, web-detection false positives, successful compromise validation, and escalation.
+Coverage includes LFI/directory traversal, SQL injection, IDOR, XSS, command injection, detection false positives, attack-success validation, and escalation.
 
-## Malware & Ransomware Investigations
+## Malware & Ransomware
 
 Location: [`Investigations/malware-analysis/`](./Investigations/malware-analysis/)
 
-SOC cases:
-
 ```text
 SOC-012 through SOC-017
-```
-
-Dedicated malware-analysis cases:
-
-```text
+SOC-019
 MAL-001 through MAL-003
 ```
 
-Coverage includes:
+Coverage includes malicious executables, Emotet, macro-enabled Office files, ransomware, malicious-document downloaders, static analysis, VBA deobfuscation, dynamic analysis, process trees, Procmon, Process Hacker, Regshot, Wireshark, Fiddler, sandbox analysis, persistence, outbound-infrastructure correlation, and false-positive validation.
 
-- malicious executables
-- Emotet
-- macro-enabled Office files
-- ransomware
-- static malware analysis
-- VBA deobfuscation
-- dynamic malware analysis
-- process trees
-- Procmon
-- Process Hacker
-- Regshot
-- Wireshark
-- Fiddler
-- sandbox analysis
-- persistence
-- outbound infrastructure correlation
-- false-positive validation
+## Threat Intelligence
 
-## Network / PCAP Analysis
+Location: [`Investigations/threat-intelligence/`](./Investigations/threat-intelligence/)
+
+```text
+SOC-018
+```
+
+Coverage includes shortened-URL analysis, redirect-chain validation, reputation assessment, shared-infrastructure reasoning, and evidence-based false-positive classification.
+
+## Network / PCAP
 
 Location: [`Investigations/network/`](./Investigations/network/)
-
-Current case:
 
 ```text
 PCAP-001
@@ -291,8 +223,6 @@ PCAP-001
 
 Location: [`Investigations/DFIR/`](./Investigations/DFIR/)
 
-Current case:
-
 ```text
 DFIR-001
 ```
@@ -301,20 +231,14 @@ DFIR-001
 
 # Detection Engineering
 
-Investigations should not end when a verdict is reached.
+Investigations should not end when a verdict is reached. Investigation-derived detection ideas now include:
 
-Where appropriate, I ask:
-
-> How could this behavior be detected earlier, more reliably, and with fewer false positives?
-
-Investigation-derived detection ideas include:
-
-- malicious-domain access
+- malicious-domain and malicious-URL access
 - risky password-protected attachments
-- malicious file hashes
 - Office → suspicious child process
 - Office → outbound network activity
-- SQLi/XSS/command-injection patterns
+- macro document → PowerShell / remote download behavior
+- SQLi / XSS / command-injection patterns
 - IDOR enumeration
 - credential-file access
 - HTTP Basic Authentication over plaintext
@@ -322,9 +246,12 @@ Investigation-derived detection ideas include:
 - Run-key persistence
 - direct SMTP from unusual processes
 - ransomware recovery inhibition
+- threat-intelligence indicator confidence / expiration
+- URL-shortener redirect resolution
+- repeated Windows 4625 failures followed by 4624 success
 - false-positive tuning for legitimate software installers
 
-The dedicated [Detection-as-Code Pipeline](https://github.com/ktaz32/Detection-as-Code-Pipeline) extends this work into tested, version-controlled detection engineering.
+See [`detection-engineering/`](./detection-engineering/) and the standalone [Detection-as-Code Pipeline](https://github.com/ktaz32/Detection-as-Code-Pipeline).
 
 ---
 
@@ -332,16 +259,25 @@ The dedicated [Detection-as-Code Pipeline](https://github.com/ktaz32/Detection-a
 
 Operational references are stored under [`knowledge/`](./knowledge/).
 
-Current topics include:
+Current knowledge references include:
 
 - Cyber Kill Chain
 - MITRE ATT&CK
 - Phishing Email Analysis
 - Detecting Web Attacks
 - Detecting Web Attacks 2
-- SIEM Alert Investigation Workflow
+- SIEM 101
+- SIEM Alert Investigation
+- Incident Management 101
+- Network Log Analysis
+- Security Solutions
 - Malware Analysis Fundamentals
 - Dynamic Malware Analysis
+- Malicious Document Analysis
+- Splunk
+- Cyber Threat Intelligence
+- VirusTotal for SOC Analysts
+- Detecting Brute Force Attacks
 
 The knowledge base is written as **practical analyst reference material**, not certification-study notes.
 
@@ -349,12 +285,15 @@ The knowledge base is written as **practical analyst reference material**, not c
 
 # Tools & Technologies
 
-## SOC / Investigation
+## SOC / SIEM / Investigation
 
+- Splunk / SPL fundamentals
 - SIEM and log analysis
+- Windows Event Viewer
+- Windows Security Events 4624 / 4625
 - EDR concepts and containment
-- incident response
-- threat intelligence
+- incident response / incident management
+- threat intelligence / CTI
 - IOC enrichment
 - email-security analysis
 - proxy and firewall analysis
@@ -373,6 +312,7 @@ The knowledge base is written as **practical analyst reference material**, not c
 - Fiddler
 - CyberChef
 - static and dynamic malware analysis
+- VBA / malicious-document analysis
 - process-tree analysis
 - registry persistence
 - file-system analysis
@@ -421,18 +361,23 @@ The knowledge base is written as **practical analyst reference material**, not c
 
 **In Progress**
 
-Hands-on areas covered include:
+Hands-on areas now documented include:
 
 - SOC fundamentals
 - phishing investigations
 - web attack analysis
 - SIEM/log investigation
+- incident management
 - threat-intelligence enrichment
 - endpoint containment
+- Windows authentication / brute-force analysis
 - malware analysis fundamentals
+- malicious-document analysis
 - static malware analysis
 - dynamic malware analysis
 - sandbox/process-tree analysis
+- VirusTotal analysis
+- Splunk fundamentals and Windows log ingestion
 - Wireshark / PCAP analysis
 - DFIR-style investigation
 
@@ -467,15 +412,7 @@ Major investigation reports generally include:
 
 All investigations are conducted in authorized training, simulated SOC, or personally controlled environments.
 
-I do not intentionally publish:
-
-- credentials
-- API keys
-- tokens
-- challenge flags
-- confidential information
-- unnecessary personally identifiable information
-- raw training answers that do not contribute to analyst reasoning
+I do not intentionally publish credentials, API keys, tokens, challenge flags, confidential information, unnecessary personally identifiable information, or raw training answers that do not contribute to analyst reasoning.
 
 Screenshots and logs are retained only when they support a meaningful analytical point.
 
@@ -494,7 +431,10 @@ SOC-Analyst-Portfolio/
 │   │   └── SOC-006 ... SOC-011
 │   ├── malware-analysis/
 │   │   ├── SOC-012 ... SOC-017
+│   │   ├── SOC-019
 │   │   └── MAL-001 ... MAL-003
+│   ├── threat-intelligence/
+│   │   └── SOC-018
 │   ├── network/
 │   │   └── PCAP-001
 │   └── DFIR/
@@ -505,11 +445,20 @@ SOC-Analyst-Portfolio/
 │   ├── Phishing-email-analysis/
 │   ├── detecting-web-attacks/
 │   ├── detecting-web-attacks-2/
+│   ├── siem-101/
 │   ├── siem-alert-investigation/
+│   ├── incident-management-101/
+│   ├── network-log-analysis/
+│   ├── security-solutions/
 │   ├── malware-analysis-fundamentals/
-│   └── dynamic-malware-analysis/
+│   ├── dynamic-malware-analysis/
+│   ├── malicious-document-analysis/
+│   ├── splunk/
+│   ├── cyber-threat-intelligence/
+│   ├── virustotal-soc-analyst/
+│   └── brute-force-attack-detection/
 ├── detection-engineering/
-├── security labs/
+├── security-labs/
 └── templates/
 ```
 
@@ -520,12 +469,13 @@ SOC-Analyst-Portfolio/
 I am continuing to develop deeper capability in:
 
 - SOC investigation and threat hunting
-- Windows endpoint analysis
+- Windows endpoint and authentication analysis
 - DFIR
-- malware analysis
+- malware and malicious-document analysis
 - detection engineering
 - Splunk / SPL
 - Sigma / YARA
+- Active Directory and identity security
 - cloud security
 - incident response
 - Python-based security automation

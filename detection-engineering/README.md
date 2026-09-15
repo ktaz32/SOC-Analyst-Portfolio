@@ -41,13 +41,16 @@ Analyst playbook
 
 ---
 
-# Investigation-Derived Detection Areas
+# Current Investigation-Derived Detection Areas
 
-Current portfolio investigations have generated detection ideas for:
+Current portfolio work has generated detection ideas for:
 
-- malicious-domain access
+- malicious-domain and malicious-URL access
+- threat-intelligence feed confidence and IOC expiration
+- URL-shortener redirect resolution
 - password-protected attachment risk
 - Office → suspicious child process
+- Office → PowerShell / remote file download
 - Office → outbound infrastructure
 - SQL injection
 - XSS
@@ -59,7 +62,32 @@ Current portfolio investigations have generated detection ideas for:
 - Run-key persistence
 - direct SMTP from unusual processes
 - ransomware recovery inhibition
+- repeated Windows 4625 failures followed by 4624 success
+- password-spraying / brute-force distribution patterns
 - legitimate-installer false-positive reduction
+- shared-infrastructure false-positive reduction
+
+---
+
+# Detection Quality Principles
+
+A detection should be:
+
+- **behavior-based** where possible
+- **telemetry-aware**
+- **testable**
+- **explainable to an analyst**
+- **tuned against benign behavior**
+- **mapped to ATT&CK only when supported**
+
+Important distinctions:
+
+```text
+IOC match ≠ compromise
+sandbox capability ≠ endpoint execution
+reputation score ≠ verdict
+failed logons ≠ brute force by themselves
+```
 
 ---
 

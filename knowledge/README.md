@@ -2,7 +2,7 @@
 
 This directory contains operational reference material that supports the investigations in this portfolio.
 
-The goal is not to reproduce course notes. Each reference is written around the questions a SOC analyst needs to answer during an investigation:
+The goal is not to reproduce course notes. Each reference is written around practical SOC questions:
 
 - What telemetry matters?
 - What behavior is normal?
@@ -23,9 +23,20 @@ The goal is not to reproduce course notes. Each reference is written around the 
 | Phishing Email Analysis | [`Phishing-email-analysis/`](./Phishing-email-analysis/) | Headers, sender validation, URLs, attachments, delivery impact |
 | Detecting Web Attacks | [`detecting-web-attacks/`](./detecting-web-attacks/) | HTTP, SQLi, XSS, IDOR, LFI, response analysis |
 | Detecting Web Attacks 2 | [`detecting-web-attacks-2/`](./detecting-web-attacks-2/) | Brute force, traversal, open redirect, XXE, defensive patterns |
+| SIEM 101 | [`siem-101/`](./siem-101/) | Log aggregation, parsing, normalization, storage, alerting |
 | SIEM Alert Investigation | [`siem-alert-investigation/`](./siem-alert-investigation/) | Triage, evidence pivots, scoping, verdict, closure |
+| Incident Management 101 | [`incident-management-101/`](./incident-management-101/) | Case management, playbooks, SIEM/SOAR/CTI workflow |
+| Network Log Analysis | [`network-log-analysis/`](./network-log-analysis/) | Netflow, WAF, SMTP, protocol and traffic analysis |
+| Security Solutions | [`security-solutions/`](./security-solutions/) | IDS/IPS, firewalls, endpoint protection, WAF, sandboxing |
 | Malware Analysis Fundamentals | [`malware-analysis-fundamentals/`](./malware-analysis-fundamentals/) | Static/dynamic analysis, sandboxing, processes, persistence, network behavior |
-| Dynamic Malware Analysis | [`dynamic-malware-analysis/`](./dynamic-malware-analysis/) | Process Hacker, Procmon, Regshot, Wireshark, Fiddler, persistence, timelines |
+| Dynamic Malware Analysis | [`dynamic-malware-analysis/`](./dynamic-malware-analysis/) | Process Hacker, Procmon, Regshot, Wireshark, Fiddler, persistence |
+| Malicious Document Analysis | [`malicious-document-analysis/`](./malicious-document-analysis/) | Office documents, macros, deobfuscation, downloader behavior |
+| Splunk | [`splunk/`](./splunk/) | Windows log ingestion, indexes, search, fields, reports, dashboards, RBAC |
+| Cyber Threat Intelligence | [`cyber-threat-intelligence/`](./cyber-threat-intelligence/) | CTI lifecycle, IOC validation, attack surface, EASM/DRP, SOC integration |
+| VirusTotal for SOC Analysts | [`virustotal-soc-analyst/`](./virustotal-soc-analyst/) | Detection, Details, Relations, Behavior, freshness, correlation |
+| Detecting Brute Force Attacks | [`brute-force-attack-detection/`](./brute-force-attack-detection/) | SSH/HTTP/RDP brute force, Windows 4624/4625 correlation, prevention |
+
+**Current total: 17 operational references.**
 
 ---
 
@@ -44,13 +55,13 @@ Alert
  + Network activity
  + Sandbox behavior
  + Threat intelligence
- + User / host contexts
+ + User / host context
 ```
 
 ## Evidence vs Inference
 
 ### Direct Evidence
-What the logs or artifacts explicitly show.
+What logs or artifacts explicitly show.
 
 ### Analyst Inference
 What can reasonably be concluded.
@@ -58,101 +69,70 @@ What can reasonably be concluded.
 ### Not Established
 What cannot be proven.
 
-This distinction prevents unsupported claims about:
-
-- exploitation success
-- malware execution
-- C2
-- persistence
-- credential compromise
-- lateral movement
-- exfiltration
+This distinction prevents unsupported claims about exploitation success, malware execution, C2, persistence, credential compromise, lateral movement, or exfiltration.
 
 ## Detection Is Not Compromise
 
 ```text
-SQLi payload observed
-≠ database compromise confirmed
-```
-
-```text
-malicious attachment delivered
-≠ malware execution confirmed
-```
-
-```text
-outbound connection observed
-≠ C2 automatically confirmed
-```
-
-```text
-SMTP session observed
-≠ data exfiltration automatically confirmed
+SQLi payload observed ≠ database compromise confirmed
+malicious attachment delivered ≠ malware execution confirmed
+outbound connection observed ≠ C2 automatically confirmed
+SMTP session observed ≠ data exfiltration automatically confirmed
+4625 failures followed by 4624 ≠ brute-force success until account/source context is correlated
 ```
 
 ---
 
-# Investigation-Oriented Workflow
+# Current Practical Coverage
 
-```text
-Understand technology
-        ↓
-Identify expected behavior
-        ↓
-Identify anomaly
-        ↓
-Collect relevant telemetry
-        ↓
-Normalize / decode
-        ↓
-Correlate sources
-        ↓
-Assess success and impact
-        ↓
-Map supported ATT&CK behavior
-        ↓
-Document verdict + confidence
-        ↓
-Identify detection improvements
-```
+## SIEM / Log Analysis
 
----
+- log aggregation, parsing, normalization, enrichment, storage, and alerting
+- SIEM investigation workflow
+- Splunk indexes, ingestion, forwarders, search modes, fields, reports, and dashboards
+- Windows Security events
+- Event IDs 4624 and 4625
+- authentication correlation
 
-# Malware Analysis Reference Areas
+## Network / Web
 
-The knowledge base now includes both malware-analysis fundamentals and a dedicated dynamic-analysis guide.
+- HTTP fundamentals and web-server logs
+- WAF and firewall telemetry
+- NetFlow concepts
+- SMTP analysis
+- SQL injection, XSS, IDOR, LFI, directory traversal, command injection
+- brute-force and login analysis
 
-Current coverage includes:
+## Malware / Documents
 
-- file hashes and reputation
 - static vs dynamic analysis
-- malicious Office documents
-- VBA/macros
-- sandbox analysis
-- process trees
-- short-lived child processes
+- malicious Office documents and VBA/macros
+- VirusTotal Detection / Details / Relations / Behavior
+- sandbox behavior
+- process trees and short-lived child processes
 - Procmon filtering
-- file-system activity
 - `%TEMP%`, `%APPDATA%`, Startup locations
 - Run / RunOnce persistence
-- scheduled tasks
-- WMI
-- Process Hacker
-- Regshot
-- Wireshark
-- Fiddler
-- DNS / HTTP / SMTP analysis
-- dropped payloads
-- ransomware recovery inhibition
-- anti-analysis / delayed execution
-- IOC extraction
-- behavioral detection opportunities
+- scheduled tasks and WMI
+- Process Hacker, Regshot, Wireshark, Fiddler
+- DNS / HTTP / SMTP behavior
+- dropped payloads and ransomware behavior
+
+## Threat Intelligence / Incident Handling
+
+- CTI lifecycle
+- technical, tactical, operational, and strategic intelligence
+- IOC validation and freshness
+- attack-surface intelligence
+- EASM / DRP concepts
+- SIEM / SOAR / EDR / firewall CTI integration
+- incident-management workflow and playbooks
 
 ---
 
 # Detection Engineering Mindset
 
-The knowledge material is also used to derive detection hypotheses.
+The knowledge material is used to derive detection hypotheses.
 
 Examples:
 
@@ -175,22 +155,14 @@ outbound SMTP
 ```
 
 ```text
-rare executable
+repeated Event ID 4625
 +
-shadow-copy deletion
+same account/source context
 +
-mass file modification
+subsequent Event ID 4624
 ```
 
-Strong detections should consider:
-
-- expected baselines
-- false positives
-- process ancestry
-- time windows
-- multiple telemetry sources
-- negative test cases
-- tuning boundaries
+Strong detections should consider expected baselines, false positives, process ancestry, time windows, telemetry quality, negative test cases, and tuning boundaries.
 
 ---
 
@@ -200,37 +172,36 @@ Strong detections should consider:
 - Cyber Kill Chain
 - MITRE ATT&CK
 - phishing / email
-- HTTP fundamentals
-- web-server logs
-- SQL injection
-- XSS
-- IDOR
-- LFI / RFI
-- brute force
+- SIEM fundamentals
+- Splunk
+- incident management
+- CTI
+- VirusTotal
+- network logs
+- IDS / IPS / firewalls / WAF
+- HTTP and web attacks
+- brute-force / authentication attacks
 - malware-analysis fundamentals
 - dynamic malware analysis
+- malicious-document analysis
 - process / file / registry / network behavior
 - persistence
 - IOC enrichment
-- SIEM investigation
-- incident response
 - detection engineering
 
 ---
 
 # Future Expansion
 
-Planned areas include:
+Planned deeper areas include:
 
-- Windows Event IDs
 - Sysmon
-- PowerShell logging
+- PowerShell Script Block logging
 - Active Directory
-- authentication attacks
-- DNS / firewall analysis
+- Kerberos / NTLM authentication analysis
+- advanced Splunk SPL
 - threat hunting
-- Splunk SPL
-- Sigma
+- Sigma correlation engineering
 - YARA
 - memory forensics
 - disk forensics
